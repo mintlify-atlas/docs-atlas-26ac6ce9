@@ -1,0 +1,390 @@
+---
+title: Hyprland Configuration
+description: Understanding the modular Hyprland window manager configuration
+---
+
+## Main Configuration File
+
+The Hyprland configuration uses a modular approach where the main config file (`hyprland.conf`) imports separate module files:
+
+```conf hyprland/hypr/hyprland.conf
+# Import modules
+$modules = ~/.config/hypr/modules
+
+source = $modules/vars.conf
+source = $modules/env.conf
+source = $modules/input.conf
+source = $modules/monitors.conf
+source = $modules/general.conf
+source = $modules/theme.conf
+source = $modules/layout.conf
+source = $modules/autostart.conf
+source = $modules/windowrules.conf
+source = $modules/binds.conf
+```
+
+<Info>
+  This modular structure makes it easy to manage different aspects of your configuration independently.
+</Info>
+
+## Configuration Modules
+
+### Variables (`vars.conf`)
+
+Defines global variables for applications, keybindings, and color scheme:
+
+```conf vars.conf
+# Applications
+$terminal = kitty
+$fileManager = nemo
+$menu = rofi -show drun
+$lock = hyprlock
+$browser = brave
+
+# Main modifier keys
+$mainMod = SUPER
+$ctrlMod = Control_L
+$altMod = ALT_L
+
+# Color scheme (Catppuccin-inspired)
+$mauve = rgba(c6a0f6ff)
+$blue = rgba(8aadf4ff)
+$red = rgba(ed8796ff)
+$green = rgba(a6da95ff)
+$peach = rgba(f5a97fff)
+
+# Backgrounds
+$mantle = rgba(1a1a1aee)
+$base = rgba(24273aff)
+$surface0 = rgba(49495aff)
+
+# Text colors
+$text = rgba(cad1d9ff)
+$subtext0 = rgba(a5adcbff)
+```
+
+### General Settings (`general.conf`)
+
+Core window manager behavior and appearance:
+
+```conf general.conf
+general {
+    border_size = 2
+    gaps_in = 5
+    gaps_out = 9
+
+    # Border colors using variables
+    col.active_border = $blue
+    col.inactive_border = $surface0
+
+    # Window management
+    layout = master
+    resize_on_border = true
+    extend_border_grab_area = 15
+    allow_tearing = false
+
+    snap {
+        enabled = true
+        window_gap = 10
+        monitor_gap = 10
+        border_overlap = false
+        respect_gaps = true
+    }
+}
+
+misc {
+    vfr = true                          # Variable refresh rate
+    animate_manual_resizes = false
+    close_special_on_empty = false
+    initial_workspace_tracking = 1
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Border Configuration">
+    - **border_size**: Width of window borders in pixels (2px)
+    - **col.active_border**: Color for focused window border (blue)
+    - **col.inactive_border**: Color for unfocused windows (gray)
+  </Accordion>
+
+  <Accordion title="Gaps Configuration">
+    - **gaps_in**: Inner gaps between windows (5px)
+    - **gaps_out**: Outer gaps between windows and screen edges (9px)
+  </Accordion>
+
+  <Accordion title="Snap Behavior">
+    Smart window snapping with customizable gaps and border behavior
+  </Accordion>
+</AccordionGroup>
+
+### Input Configuration (`input.conf`)
+
+Keyboard and mouse settings:
+
+```conf input.conf
+input {
+    kb_layout = es              # Spanish keyboard layout
+    follow_mouse = 1
+    sensitivity = 0             # Default sensitivity
+}
+
+cursor {
+    hide_on_key_press = true
+}
+```
+
+### Monitor Setup (`monitors.conf`)
+
+Display configuration with multi-monitor support:
+
+```conf monitors.conf
+# Default configuration (auto-detect)
+monitor=,1920x1080@120,auto,1
+
+# Multi-monitor example:
+# monitor=HDMI-A-1,1920x1080@60,0x0,1
+# monitor=DP-1,2560x1440@165,-1920x0,1
+# workspace=1,monitor:HDMI-A-1
+# workspace=2,monitor:DP-1
+
+render {
+    direct_scanout = 2
+}
+```
+
+<Note>
+  To find your monitor names, run `hyprctl monitors` in a terminal.
+</Note>
+
+### Theme & Animations (`theme.conf`)
+
+Visual effects, animations, and decorations:
+
+```conf theme.conf
+animations {
+    enabled = yes
+
+    bezier = myBezier, 0.05, 0.9, 0.1, 1.05
+    bezier = easeInOutQuad, 0.45, 0, 0.55, 1
+
+    animation = windows, 1, 7, myBezier
+    animation = windowsIn, 1, 7, myBezier
+    animation = windowsOut, 1, 7, default, popin 80%
+    animation = windowsMove, 1, 5, myBezier
+
+    animation = fade, 1, 7, default
+    animation = workspaces, 1, 6, easeInOutQuad
+    animation = border, 1, 10, default
+}
+
+decoration {
+    rounding = 9                # Corner radius
+    dim_inactive = true
+    dim_strength = 0.2
+
+    active_opacity = 1.0
+    inactive_opacity = 0.85
+
+    blur {
+        enabled = true
+        size = 8
+        passes = 1
+        new_optimizations = true
+        special = true
+    }
+
+    shadow {
+        enabled = true
+        range = 6
+        render_power = 2
+        color = rgba(1a1a1aee)
+    }
+}
+```
+
+### Layout Configuration (`layout.conf`)
+
+Master layout settings (default layout):
+
+```conf layout.conf
+master {
+    new_status = master         # New windows become master
+    new_on_top = false
+    mfact = 0.55                # Master window width ratio
+    orientation = right         # Master on left, stack on right
+    smart_resizing = true
+}
+```
+
+<Tip>
+  The master layout is ideal for ultrawide monitors and productivity workflows where one main window is always visible.
+</Tip>
+
+### Autostart Applications (`autostart.conf`)
+
+Programs and services launched with Hyprland:
+
+```conf autostart.conf
+# Systemd environment
+exec-once = dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
+# UI components
+exec-once = waybar              # Status bar
+exec-once = mako                # Notifications
+exec-once = nm-applet           # Network manager
+
+# System services
+exec-once = hypridle            # Idle daemon
+exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
+# Clipboard manager
+exec-once = wl-paste --type text --watch cliphist store
+exec-once = wl-paste --type image --watch cliphist store
+
+# Wallpaper
+exec-once = awww-daemon
+exec-once = awww img ~/dotfiles/imgs/wall.jpg
+
+# Scratchpad terminal
+exec-once = [workspace special:magic silent] $terminal
+```
+
+<AccordionGroup>
+  <Accordion title="Status Bar (Waybar)">
+    Customizable status bar showing workspaces, system info, and tray icons
+  </Accordion>
+
+  <Accordion title="Notifications (Mako)">
+    Lightweight notification daemon with custom styling
+  </Accordion>
+
+  <Accordion title="Clipboard Manager">
+    `cliphist` stores clipboard history for text and images
+  </Accordion>
+
+  <Accordion title="Wallpaper Daemon">
+    `awww` (Another Wayland Wallpaper Wrapper) manages wallpapers
+  </Accordion>
+</AccordionGroup>
+
+### Window Rules (`windowrules.conf`)
+
+Automatic window behavior based on application class:
+
+```conf windowrules.conf
+windowrule {
+    name = wofi-config
+    match:class = ^(wofi)$
+    float = on
+    size = 50% 50%
+    center = on
+}
+
+windowrule {
+    name = pavucontrol-config
+    match:class = ^(pavucontrol)$
+    float = on
+    size = 80% 80%
+}
+
+# Notifications (sticky)
+windowrule {
+    name = notifications
+    match:class = ^(mako)$
+    pin = on
+    float = on
+}
+```
+
+<Tip>
+  To find the class of a window, run `hyprctl clients` and look for the class name.
+</Tip>
+
+## Key Configuration Files Location
+
+```
+hyprland/hypr/
+├── hyprland.conf              # Main entry point
+└── modules/
+    ├── vars.conf              # Variables and colors
+    ├── env.conf               # Environment variables
+    ├── input.conf             # Input devices
+    ├── monitors.conf          # Display configuration
+    ├── general.conf           # Core window manager settings
+    ├── theme.conf             # Animations and decorations
+    ├── layout.conf            # Layout algorithm settings
+    ├── autostart.conf         # Startup applications
+    ├── windowrules.conf       # Per-application rules
+    └── binds.conf             # Keybindings
+```
+
+## Modifying the Configuration
+
+<Steps>
+  <Step title="Edit Module Files">
+    Navigate to `~/dotfiles/hyprland/hypr/modules/` and edit the relevant module file
+  </Step>
+
+  <Step title="Reload Hyprland">
+    Press `Super + Ctrl + R` or run `hyprctl reload`
+  </Step>
+
+  <Step title="Test Changes">
+    Verify your changes work as expected
+  </Step>
+
+  <Step title="Commit Changes">
+    ```bash
+    cd ~/dotfiles
+    git add hyprland/hypr/modules/
+    git commit -m "Update Hyprland configuration"
+    ```
+  </Step>
+</Steps>
+
+## Color Customization
+
+The configuration uses a Catppuccin-inspired color scheme defined in `vars.conf`. To change colors:
+
+1. Edit color variables in `vars.conf`
+2. Colors are referenced throughout other configs using `$variableName`
+3. Reload Hyprland to apply changes
+
+<CodeGroup>
+```conf Active Border Color
+# In vars.conf
+$blue = rgba(8aadf4ff)
+
+# In general.conf
+col.active_border = $blue
+```
+
+```conf Custom Color Scheme
+# Define your own colors
+$accent = rgba(ff6600ff)
+$background = rgba(1e1e2eff)
+
+# Use in configuration
+col.active_border = $accent
+```
+</CodeGroup>
+
+## Related Configurations
+
+<CardGroup cols={2}>
+  <Card title="Waybar" icon="chart-bar" href="/configuration/applications#waybar">
+    Status bar configuration and styling
+  </Card>
+
+  <Card title="Rofi" icon="square-terminal" href="/configuration/applications#rofi">
+    Application launcher theming
+  </Card>
+
+  <Card title="Mako" icon="bell" href="/configuration/applications#mako">
+    Notification daemon settings
+  </Card>
+
+  <Card title="Keybindings" icon="keyboard">
+    Keyboard shortcuts (defined in `binds.conf`)
+  </Card>
+</CardGroup>

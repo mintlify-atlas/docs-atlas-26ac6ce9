@@ -1,0 +1,660 @@
+---
+title: Troubleshooting
+description: Solutions to common issues and problems with the Hyprland dotfiles setup
+---
+
+This guide covers common issues you might encounter and how to resolve them.
+
+## Installation Issues
+
+### Paru Not Installed
+
+**Problem:** The install script fails because Paru is not available.
+
+**Solution:**
+
+Install Paru manually before running the dotfiles installer:
+
+```bash
+# Install build dependencies
+sudo pacman -S --needed base-devel git
+
+# Clone and build Paru
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+cd ..
+rm -rf paru
+```
+
+Then run the dotfiles installer:
+
+```bash
+cd ~/dotfiles
+./install
+```
+
+### Git Submodules Missing
+
+**Problem:** Dotbot or other submodules are missing.
+
+**Error:** `fatal: not a git repository` or empty directories
+
+**Solution:**
+
+```bash
+cd ~/dotfiles
+
+# Initialize and update submodules
+git submodule init
+git submodule update --recursive
+
+# Or re-clone with submodules
+cd ~
+rm -rf dotfiles
+git clone --recurse-submodules https://github.com/your-repo/dotfiles
+```
+
+### Package Installation Fails
+
+**Problem:** Some packages fail to install during setup.
+
+**Solution:**
+
+1. **Update system first:**
+   ```bash
+   sudo pacman -Syu
+   ```
+
+2. **Check for conflicts:**
+   ```bash
+   paru -S package-name
+   # Read error messages carefully
+   ```
+
+3. **Install problematic packages manually:**
+   ```bash
+   # Skip in packages.txt temporarily
+   paru -S problematic-package
+   ```
+
+4. **Check AUR package status:**
+   - Visit https://aur.archlinux.org/
+   - Search for the package
+   - Check comments for known issues
+
+<Warning>
+  Some AUR packages may be out-of-date or broken. Check the AUR page for alternatives or fixes.
+</Warning>
+
+### Permission Denied Errors
+
+**Problem:** Installation fails with permission errors.
+
+**Solution:**
+
+```bash
+# Make install script executable
+chmod +x ~/dotfiles/install
+
+# Ensure proper ownership
+sudo chown -R $USER:$USER ~/dotfiles
+```
+
+## Hyprland Not Starting
+
+### Black Screen on Launch
+
+**Problem:** Hyprland launches but shows only a black screen.
+
+**Solution:**
+
+1. **Check Hyprland logs:**
+   ```bash
+   cat /tmp/hypr/$(ls -t /tmp/hypr/ | head -n 1)/hyprland.log
+   ```
+
+2. **Test with minimal config:**
+   ```bash
+   # Backup current config
+   mv ~/.config/hypr ~/.config/hypr.backup
+   
+   # Create minimal config
+   mkdir -p ~/.config/hypr
+   echo 'exec-once = kitty' > ~/.config/hypr/hyprland.conf
+   
+   # Launch Hyprland
+   Hyprland
+   ```
+
+3. **Check autostart errors:**
+   - Edit `~/.config/hypr/modules/autostart.conf`
+   - Comment out autostart applications one by one
+   - Find which application is causing the issue
+
+### Hyprland Crashes on Startup
+
+**Problem:** Hyprland immediately crashes when launched.
+
+**Solution:**
+
+1. **Check for missing dependencies:**
+   ```bash
+   paru -S qt6-wayland xdg-desktop-portal-hyprland
+   ```
+
+2. **Verify GPU drivers:**
+   ```bash
+   # For NVIDIA (if applicable)
+   paru -S nvidia-dkms nvidia-utils
+   
+   # For AMD
+   paru -S mesa vulkan-radeon
+   
+   # For Intel
+   paru -S mesa vulkan-intel
+   ```
+
+3. **Check environment variables:**
+   - Edit `~/.config/hypr/modules/env.conf`
+   - Comment out GPU-specific variables if needed
+
+4. **Launch from TTY with debug output:**
+   ```bash
+   Hyprland 2>&1 | tee ~/hyprland-debug.log
+   ```
+
+### Monitor Configuration Issues
+
+**Problem:** Displays not detected or incorrectly configured.
+
+**Solution:**
+
+1. **List available monitors:**
+   ```bash
+   hyprctl monitors
+   ```
+
+2. **Edit monitor configuration:**
+   ```conf
+   # ~/.config/hypr/modules/monitors.conf
+   
+   # Auto-detect (default)
+   monitor = ,preferred,auto,1
+   
+   # Or specify explicitly
+   monitor = HDMI-A-1,1920x1080@60,0x0,1
+   ```
+
+3. **Reload configuration:**
+   ```bash
+   hyprctl reload
+   ```
+
+## Application Configuration Problems
+
+### Waybar Not Appearing
+
+**Problem:** Waybar doesn't show up after starting Hyprland.
+
+**Solution:**
+
+1. **Check if Waybar is running:**
+   ```bash
+   pgrep waybar
+   ```
+
+2. **Start Waybar manually:**
+   ```bash
+   waybar &
+   ```
+
+3. **Check Waybar logs:**
+   ```bash
+   waybar --log-level debug
+   ```
+
+4. **Verify configuration:**
+   ```bash
+   # Test config syntax
+   waybar --config ~/.config/waybar/config.json --style ~/.config/waybar/style.css
+   ```
+
+5. **Common config issues:**
+   - Missing dependencies: `paru -S otf-font-awesome`
+   - Invalid JSON in `config.json`
+   - CSS syntax errors in `style.css`
+
+### Rofi Won't Launch
+
+**Problem:** Pressing `Super + Space` doesn't open Rofi.
+
+**Solution:**
+
+1. **Test Rofi manually:**
+   ```bash
+   rofi -show drun
+   ```
+
+2. **Check Rofi config:**
+   ```bash
+   rofi -show drun -config ~/.config/rofi/config.rasi
+   ```
+
+3. **Verify keybinding:**
+   ```conf
+   # ~/.config/hypr/modules/binds.conf
+   bind = $mainMod, SPACE, exec, $menu
+   ```
+
+4. **Check menu variable:**
+   ```conf
+   # ~/.config/hypr/modules/vars.conf
+   $menu = rofi -show drun
+   ```
+
+### Kitty Terminal Not Opening
+
+**Problem:** `Super + Return` doesn't launch Kitty.
+
+**Solution:**
+
+1. **Launch from Rofi:**
+   - Press `Super + Space`
+   - Type "kitty"
+   - Check for error messages
+
+2. **Test Kitty directly:**
+   ```bash
+   kitty
+   ```
+
+3. **Check Kitty config:**
+   ```bash
+   kitty --debug-config
+   ```
+
+4. **Verify terminal variable:**
+   ```conf
+   # ~/.config/hypr/modules/vars.conf
+   $terminal = kitty
+   ```
+
+### Screenshots Not Working
+
+**Problem:** Screenshot keybindings don't work.
+
+**Solution:**
+
+1. **Ensure screenshot tools are installed:**
+   ```bash
+   paru -S hyprshot grim slurp satty wl-clipboard
+   ```
+
+2. **Create screenshots directory:**
+   ```bash
+   mkdir -p ~/Pictures/Screenshots
+   ```
+
+3. **Test manually:**
+   ```bash
+   # Full screen
+   hyprshot -m output --clipboard-only
+   
+   # Region
+   hyprshot -m region --clipboard-only
+   ```
+
+4. **Check keybindings:**
+   ```conf
+   # ~/.config/hypr/modules/binds.conf
+   bind = , Print, exec, hyprshot -m output --raw | satty --filename - --output-filename ~/Pictures/Screenshots/$(date '+%Y%m%d-%H%M%S').png
+   ```
+
+## Package Conflicts
+
+### Package X and Y are in Conflict
+
+**Problem:** Installing a package fails due to conflicts.
+
+**Solution:**
+
+1. **Identify the conflict:**
+   ```bash
+   paru -Si conflicting-package
+   ```
+
+2. **Remove the conflicting package:**
+   ```bash
+   paru -R old-package
+   paru -S new-package
+   ```
+
+3. **Check package provides:**
+   Some packages provide the same functionality:
+   ```bash
+   pacman -Qi package-name | grep Provides
+   ```
+
+### Dependency Cycle Detected
+
+**Problem:** Package installation fails with circular dependencies.
+
+**Solution:**
+
+```bash
+# Update package databases
+paru -Sy
+
+# Force database refresh
+paru -Syyu
+
+# If still failing, install dependencies manually
+paru -S dependency1 dependency2
+paru -S main-package
+```
+
+## Symlink Issues
+
+### Dotbot Fails to Create Symlinks
+
+**Problem:** Installation fails with symlink errors.
+
+**Solution:**
+
+1. **Remove existing files:**
+   ```bash
+   # Backup first
+   mv ~/.config/hypr ~/.config/hypr.old
+   
+   # Re-run installer
+   cd ~/dotfiles
+   ./install
+   ```
+
+2. **Check for broken symlinks:**
+   ```bash
+   # Find broken symlinks
+   find ~/.config -xtype l
+   
+   # Remove broken symlinks
+   find ~/.config -xtype l -delete
+   ```
+
+3. **Force relink:**
+   ```yaml
+   # In install.conf.yaml
+   - defaults:
+       link:
+         relink: true
+         force: true
+   ```
+
+### Configuration Changes Not Taking Effect
+
+**Problem:** Editing configs in `.config` doesn't change anything.
+
+**Solution:**
+
+<Warning>
+  Don't edit files in `~/.config/` directly! They are symlinks to `~/dotfiles/`.
+</Warning>
+
+**Correct workflow:**
+
+1. **Edit source files:**
+   ```bash
+   # Edit the source in dotfiles
+   nvim ~/dotfiles/hyprland/hypr/modules/binds.conf
+   ```
+
+2. **Changes apply automatically** (symlinks point to source files)
+
+3. **Reload Hyprland:**
+   ```bash
+   hyprctl reload
+   # Or: Super + Shift + R
+   ```
+
+## Font and Icon Issues
+
+### Icons Not Displaying in Waybar/Rofi
+
+**Problem:** Icons show as boxes or question marks.
+
+**Solution:**
+
+1. **Install Nerd Fonts:**
+   ```bash
+   paru -S ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols
+   ```
+
+2. **Install Font Awesome:**
+   ```bash
+   paru -S otf-font-awesome ttf-font-awesome
+   ```
+
+3. **Rebuild font cache:**
+   ```bash
+   fc-cache -fv
+   ```
+
+4. **Verify font installation:**
+   ```bash
+   fc-list | grep -i nerd
+   fc-list | grep -i awesome
+   ```
+
+5. **Restart applications:**
+   ```bash
+   killall waybar && waybar &
+   ```
+
+### Emoji Not Rendering
+
+**Problem:** Emoji characters don't display correctly.
+
+**Solution:**
+
+```bash
+# Install emoji fonts
+paru -S noto-fonts-emoji
+
+# Rebuild font cache
+fc-cache -fv
+```
+
+## Audio Issues
+
+### Volume Keys Not Working
+
+**Problem:** Media keys don't control volume.
+
+**Solution:**
+
+1. **Check if PipeWire/PulseAudio is running:**
+   ```bash
+   systemctl --user status pipewire pipewire-pulse
+   ```
+
+2. **Start audio services:**
+   ```bash
+   systemctl --user enable --now pipewire pipewire-pulse
+   ```
+
+3. **Test volume control:**
+   ```bash
+   wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+   ```
+
+4. **Verify keybindings:**
+   ```conf
+   # ~/.config/hypr/modules/binds.conf
+   bindel = , XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+
+   ```
+
+### No Audio Output
+
+**Problem:** No sound from any application.
+
+**Solution:**
+
+```bash
+# Install audio packages
+paru -S pipewire pipewire-pulse pipewire-alsa pavucontrol
+
+# Start services
+systemctl --user enable --now pipewire pipewire-pulse
+
+# Open volume control
+pavucontrol
+```
+
+In PavuControl:
+1. Check "Output Devices" tab
+2. Ensure correct device is selected
+3. Unmute and adjust volume
+
+## Performance Issues
+
+### High CPU Usage
+
+**Problem:** Hyprland uses excessive CPU.
+
+**Solution:**
+
+1. **Reduce animation speed:**
+   ```conf
+   # ~/.config/hypr/modules/theme.conf
+   animations {
+       enabled = yes
+       
+       # Lower speed multipliers
+       animation = windows, 1, 3, myBezier  # was 7
+       animation = workspaces, 1, 3, easeInOutQuad  # was 6
+   }
+   ```
+
+2. **Reduce blur:**
+   ```conf
+   decoration {
+       blur {
+           enabled = false  # or reduce size/passes
+       }
+   }
+   ```
+
+3. **Disable shadows:**
+   ```conf
+   decoration {
+       shadow {
+           enabled = false
+       }
+   }
+   ```
+
+### Laggy Window Movements
+
+**Problem:** Windows stutter when moving or resizing.
+
+**Solution:**
+
+1. **Disable animations temporarily:**
+   ```conf
+   animations {
+       enabled = no
+   }
+   ```
+
+2. **Reduce decoration effects:**
+   ```conf
+   decoration {
+       dim_inactive = false
+       blur { enabled = false }
+   }
+   ```
+
+3. **Check GPU usage:**
+   ```bash
+   # Monitor GPU
+   htop  # or btop
+   ```
+
+## Getting Help
+
+### Where to Report Issues
+
+<Accordion title="Dotfiles Repository">
+  For issues specific to this dotfiles configuration:
+  
+  1. Check existing issues on GitHub
+  2. Create a new issue with:
+     - Your system info (`uname -a`)
+     - Hyprland version (`hyprctl version`)
+     - Error messages or logs
+     - Steps to reproduce
+</Accordion>
+
+<Accordion title="Hyprland Issues">
+  For Hyprland bugs or feature requests:
+  
+  - [Hyprland GitHub Issues](https://github.com/hyprwm/Hyprland/issues)
+  - [Hyprland Wiki](https://wiki.hyprland.org/)
+  - [Hyprland Discord](https://discord.gg/hyksh3qD)
+</Accordion>
+
+<Accordion title="Arch Linux Support">
+  For package or system issues:
+  
+  - [Arch Linux Forums](https://bbs.archlinux.org/)
+  - [Arch Linux Wiki](https://wiki.archlinux.org/)
+  - [r/archlinux Reddit](https://www.reddit.com/r/archlinux/)
+</Accordion>
+
+### Collecting Debug Information
+
+When reporting issues, include:
+
+```bash
+# System information
+uname -a
+
+# Hyprland version
+hyprctl version
+
+# Package versions
+pacman -Q hyprland waybar rofi kitty
+
+# Hyprland log
+cat /tmp/hypr/$(ls -t /tmp/hypr/ | head -n 1)/hyprland.log
+
+# Check for errors
+journalctl --user -b | grep -i error
+```
+
+## Preventive Maintenance
+
+<Tip>
+  **Regular maintenance tasks** to avoid issues:
+  
+  ```bash
+  # Weekly: Update system
+  paru -Syu
+  
+  # Monthly: Clean package cache
+  paru -Sc
+  
+  # Monthly: Remove orphaned packages
+  paru -Rns $(paru -Qtdq)
+  
+  # As needed: Check for errors
+  journalctl --user -p 3 -b
+  ```
+</Tip>
+
+## See Also
+
+- [Installation Guide](/installation) - Setup instructions
+- [Customization Guide](/guides/customization) - Modifying the configuration
+- [Package Management](/guides/adding-packages) - Managing packages
+- [Hyprland Wiki](https://wiki.hyprland.org/) - Official documentation

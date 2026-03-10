@@ -1,0 +1,462 @@
+---
+title: Shell Configuration
+description: Comprehensive Zsh configuration with plugins, aliases, and functions
+---
+
+## Zsh Configuration Structure
+
+The Zsh configuration is highly modular and performance-optimized:
+
+```
+system/zsh/
+├── .zshrc                 # Main configuration file
+├── .zprofile              # Login shell configuration
+├── .zsh_plugins.txt       # Plugin list for antidote
+├── aliases.zsh            # Command aliases
+├── functions.zsh          # Custom shell functions
+├── git.zsh                # Git aliases and shortcuts
+├── pacman.zsh             # Package manager helpers
+└── keybinds.zsh           # Custom keybindings
+```
+
+## Plugin Management
+
+### Antidote Plugin Manager
+
+Plugins are managed using [antidote](https://getantidote.github.io/), a fast and modern Zsh plugin manager.
+
+```txt .zsh_plugins.txt
+romkatv/zsh-defer
+zsh-users/zsh-completions
+sindresorhus/pure
+Aloxaf/fzf-tab
+zdharma-continuum/fast-syntax-highlighting
+djui/alias-tips
+zsh-users/zsh-autosuggestions
+```
+
+<AccordionGroup>
+  <Accordion title="zsh-defer">
+    Defers loading of plugins for faster shell startup
+  </Accordion>
+
+  <Accordion title="zsh-completions">
+    Additional completion definitions for common commands
+  </Accordion>
+
+  <Accordion title="pure">
+    Minimal and fast Zsh prompt with git integration
+  </Accordion>
+
+  <Accordion title="fzf-tab">
+    Fuzzy finder integration for tab completion
+  </Accordion>
+
+  <Accordion title="fast-syntax-highlighting">
+    Real-time syntax highlighting in the command line
+  </Accordion>
+
+  <Accordion title="alias-tips">
+    Shows when you have an alias for the command you typed
+  </Accordion>
+
+  <Accordion title="zsh-autosuggestions">
+    Fish-like autosuggestions based on history
+  </Accordion>
+</AccordionGroup>
+
+### Plugin Loading
+
+Plugins are compiled and cached for optimal performance:
+
+```zsh .zshrc
+zsh_plugins="$ZSH_CACHE/.zsh_plugins.zsh"
+
+if [[ ! -f "$zsh_plugins" || "$ZDOTDIR/.zsh_plugins.txt" -nt "$zsh_plugins" ]]; then
+  source /usr/share/zsh-antidote/antidote.zsh
+  antidote bundle <"$ZDOTDIR/.zsh_plugins.txt" >"$zsh_plugins"
+  zcompile "$zsh_plugins"
+fi
+source "$zsh_plugins"
+```
+
+## Aliases
+
+Comprehensive set of productivity-focused aliases.
+
+### Navigation & Listing
+
+```bash aliases.zsh
+# Modern ls replacement (eza)
+alias ls='eza -a --icons=always --group-directories-first'
+alias ll='eza -al --icons=always --group-directories-first --git'
+alias lt='eza -a --tree --level=2 --icons=always --group-directories-first'
+alias l='eza -1 --icons=always --group-directories-first'
+alias lnew='eza -al --sort=modified --icons=always'
+alias ldir='eza -aD --icons=always'
+alias tree='eza --tree --icons=always --group-directories-first'
+```
+
+<Info>
+  These aliases use [eza](https://github.com/eza-community/eza), a modern replacement for `ls` with better defaults and colors.
+</Info>
+
+### System & File Operations
+
+```bash aliases.zsh
+# Shell management
+alias reload='exec zsh'
+alias zcg='$EDITOR $ZDOTDIR/.zshrc'
+alias zshplugins='$EDITOR $ZDOTDIR/.zsh_plugins.txt'
+
+# Quick actions
+alias cl='clear'
+alias q='exit'
+alias ff='fastfetch'
+
+# Power management
+alias shutdown='systemctl poweroff'
+alias reboot='systemctl reboot'
+alias suspend='systemctl suspend'
+
+# Safe operations (with confirmation)
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias mkdir='mkdir -pv'
+```
+
+### Search & Find
+
+```bash aliases.zsh
+alias grep='grep --color=auto'
+alias fd='fd --hidden --follow'
+alias fdf='fd --type f --hidden --follow'   # Files only
+alias fdd='fd --type d --hidden --follow'   # Directories only
+```
+
+### Bat (Modern Cat)
+
+```bash aliases.zsh
+alias bat='bat --style=plain'
+alias bcat='bat --style=full'
+```
+
+### FZF Integration
+
+Fuzzy finder aliases for enhanced productivity:
+
+```bash aliases.zsh
+# Fuzzy file opener
+alias fv='v $(fzf --preview "bat --color=always --style=numbers --line-range=:500 {}")'
+
+# Fuzzy process killer
+alias fkill='ps -ef | fzf --header="Select process to kill" | awk "{print \$2}" | xargs -r kill -15'
+
+# Fuzzy history search (copy to clipboard)
+alias fh='history | fzf +s --tac | sed "s/ *[0-9]* *//" | wl-copy'
+```
+
+### Utilities
+
+```bash aliases.zsh
+alias wtf='dmesg | tail -n 50'              # Check kernel messages
+alias wtfg='dmesg | grep -i'                # Search kernel messages
+alias fuck='sudo $(fc -ln -1)'              # Run last command with sudo
+alias lg='lazygit'                          # Git TUI
+alias img='kitty +kitten icat'              # Display images in terminal
+alias fm='yazi'                             # File manager
+```
+
+<Tip>
+  The `fuck` alias is perfect when you forget to use sudo - just type `fuck` to re-run the last command with sudo!
+</Tip>
+
+## Functions
+
+Custom shell functions for common tasks.
+
+### Directory Navigation
+
+```bash functions.zsh
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Navigate up multiple directory levels
+# Usage: up 3 (go up 3 levels)
+up() {
+    local d=""
+    local limit=${1:-1}
+    for ((i=1 ; i <= limit ; i++)); do
+        d="${d}../"
+    done
+    cd "$d"
+}
+
+# Navigate down using fzf
+down() {
+    if ! command -v fd &> /dev/null || ! command -v fzf &> /dev/null; then
+        echo "down: requires 'fd' and 'fzf'" >&2
+        return 1
+    fi
+
+    local depth=${1:-1}
+    local target=$(fd --type d --max-depth "$depth" . | fzf)
+    [[ -n "$target" ]] && cd "$target"
+}
+```
+
+### File Utilities
+
+```bash functions.zsh
+# Quick backup of a file
+bak() {
+    cp "$1" "$1.bak"
+}
+```
+
+<CodeGroup>
+```bash Create and Enter Directory
+mkcd my-project
+# Creates my-project/ and cd's into it
+```
+
+```bash Navigate Up
+up 3
+# Goes up 3 directory levels
+```
+
+```bash Fuzzy Navigate Down
+down 2
+# Shows fuzzy finder with directories up to 2 levels deep
+```
+</CodeGroup>
+
+## Git Shortcuts
+
+Extensive git aliases for efficient version control.
+
+### Basic Commands
+
+```bash git.zsh
+alias g='git'
+alias gst='git status'
+alias gss='git status --short'
+alias gsb='git status --short --branch'
+```
+
+### Add & Commit
+
+```bash git.zsh
+# Staging
+alias ga='git add'
+alias gaa='git add --all'
+alias gap='git add --patch'
+alias gau='git add --update'
+
+# Committing
+alias gc='git commit --verbose'
+alias gcm='git commit --message'
+alias gcam='git commit --all --message'
+alias gca='git commit --verbose --all'
+
+# Amend commits
+alias gc!='git commit --verbose --amend'
+alias gcn!='git commit --verbose --no-edit --amend'
+```
+
+### Branches
+
+```bash git.zsh
+alias gb='git branch'
+alias gba='git branch --all'
+alias gbd='git branch --delete'
+alias gbD='git branch --delete --force'
+
+# Checkout
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gcm='git checkout $(git_main_branch)'
+
+# Switch (Git 2.23+)
+alias gsw='git switch'
+alias gswc='git switch --create'
+alias gswm='git switch $(git_main_branch)'
+```
+
+### Pull & Push
+
+```bash git.zsh
+# Pull
+alias gl='git pull'
+alias gpr='git pull --rebase'
+alias gpra='git pull --rebase --autostash'
+
+# Push
+alias gp='git push'
+alias gpf='git push --force-with-lease'
+alias ggp='git push origin $(git_current_branch)'
+alias gpsup='git push --set-upstream origin $(git_current_branch)'
+```
+
+### Logs & Diffs
+
+```bash git.zsh
+# Log
+alias glo='git log --oneline --decorate'
+alias glog='git log --oneline --decorate --graph'
+alias gloga='git log --oneline --decorate --graph --all'
+
+# Pretty log
+alias glol='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset"'
+
+# Diff
+alias gd='git diff'
+alias gdca='git diff --cached'
+alias gds='git diff --staged'
+```
+
+### Smart Functions
+
+```bash git.zsh
+# Get current branch name
+function git_current_branch() {
+  git symbolic-ref --short HEAD 2>/dev/null || \
+  git rev-parse --short HEAD 2>/dev/null || return 1
+}
+
+# Detect main branch (main/master)
+function git_main_branch() {
+  for ref in refs/{heads,remotes/{origin,upstream}}/{main,trunk,master}; do
+    if git show-ref -q --verify $ref 2>/dev/null; then
+      echo ${ref:t}
+      return 0
+    fi
+  done
+  echo master
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="280+ Git Aliases" icon="git">
+    Complete set of git shortcuts for every operation
+  </Card>
+
+  <Card title="Smart Branch Detection" icon="code-branch">
+    Automatically detects main/master branch
+  </Card>
+
+  <Card title="Current Branch Aliases" icon="arrow-up-right-from-square">
+    Push/pull from current branch automatically
+  </Card>
+
+  <Card title="Pretty Logs" icon="list">
+    Beautiful formatted git logs with colors
+  </Card>
+</CardGroup>
+
+## Shell Options & History
+
+### History Configuration
+
+```zsh .zshrc
+HISTFILE="$ZSH_DATA/history"
+HISTSIZE=50000
+SAVEHIST=50000
+
+setopt BANG_HIST EXTENDED_HISTORY HIST_VERIFY SHARE_HISTORY \
+       HIST_EXPIRE_DUPS_FIRST HIST_IGNORE_SPACE HIST_IGNORE_ALL_DUPS \
+       HIST_REDUCE_BLANKS INC_APPEND_HISTORY HIST_FIND_NO_DUPS
+```
+
+### Shell Behavior
+
+```zsh .zshrc
+setopt AUTOCD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT GLOB_DOTS \
+       CORRECT NO_CASE_GLOB EXTENDED_GLOB NUMERIC_GLOB_SORT \
+       AUTO_MENU COMPLETE_IN_WORD PROMPT_SUBST NO_BEEP NO_HUP \
+       CHECK_JOBS NOTIFY INTERACTIVE_COMMENTS RMSTARWAIT NOCLOBBER
+```
+
+<AccordionGroup>
+  <Accordion title="History Features">
+    - 50,000 line history buffer
+    - Shared history across all sessions
+    - Duplicate removal
+    - Timestamps in history
+  </Accordion>
+
+  <Accordion title="Navigation">
+    - Type directory name to cd (AUTOCD)
+    - Automatic directory stack (AUTO_PUSHD)
+    - Match hidden files in globs (GLOB_DOTS)
+  </Accordion>
+
+  <Accordion title="Safety">
+    - Confirm before `rm *` (RMSTARWAIT)
+    - Don't overwrite files with `>` (NOCLOBBER)
+    - Check jobs before exiting shell
+  </Accordion>
+</AccordionGroup>
+
+## Completion System
+
+```zsh .zshrc
+# Completion styles
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' menu select
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$XDG_CACHE_HOME/zsh/zcompcache"
+
+# FZF Tab integration
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:man:*' fzf-preview 'man $word | bat --color=always --language=man'
+```
+
+## Performance Optimization
+
+Configuration files are compiled for faster loading:
+
+```zsh .zshrc
+# Compile configuration files
+for conf_file in "$ZDOTDIR"/*.zsh; do
+    local cache_file="$ZSH_CACHE/zwc/${conf_file:t}.zwc"
+    if [[ ! -f "$cache_file" || "$conf_file" -nt "$cache_file" ]]; then
+        mkdir -p "${cache_file:h}"
+        zcompile "$cache_file" "$conf_file"
+    fi
+done
+```
+
+<Tip>
+  Compiled `.zwc` files significantly reduce shell startup time. They're automatically regenerated when source files change.
+</Tip>
+
+## Pure Prompt Configuration
+
+```zsh .zshrc
+export PURE_GIT_PULL=1
+export PURE_CMD_MAX_EXEC_TIME=2
+
+# Prompt colors (Catppuccin theme)
+zstyle :prompt:pure:prompt:success color "#C6A0F6"
+zstyle :prompt:pure:prompt:error color "#ED8796"
+zstyle :prompt:pure:path color "#8AADF4"
+zstyle :prompt:pure:git:branch color "#91D7E3"
+zstyle :prompt:pure:git:dirty color "#EED49F"
+zstyle :prompt:pure:execution_time color "#F5A97F"
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="System Configuration" icon="server" href="/configuration/system">
+    Environment variables and system settings
+  </Card>
+
+  <Card title="Application Configs" icon="gear" href="/configuration/applications">
+    Configure Neovim, Kitty, and more
+  </Card>
+</CardGroup>

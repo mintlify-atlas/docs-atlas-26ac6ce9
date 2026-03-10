@@ -1,0 +1,423 @@
+---
+title: 'Editor'
+description: 'Neovim with LazyVim - A modern IDE experience'
+icon: 'code'
+---
+
+## Neovim Configuration
+
+This Neovim configuration is built on top of [LazyVim](https://www.lazyvim.org/), a modern Neovim configuration framework that provides a complete IDE experience out of the box.
+
+## LazyVim Setup
+
+LazyVim provides a structured approach to Neovim configuration with:
+
+- Pre-configured LSP, formatting, and linting
+- Smart plugin management with lazy loading
+- Beautiful UI with statusline and bufferline
+- Extensive keybindings and which-key integration
+- Git integration with gitsigns and diffview
+
+## Plugin Structure
+
+Plugins are organized in `~/.config/nvim/lua/plugins/`:
+
+```bash
+nvim/lua/plugins/
+├── coding.lua         # Completion, snippets, pairs
+├── colorschemes.lua   # Color schemes
+├── editor.lua         # Editor enhancements
+├── formatting.lua     # Code formatting
+├── linting.lua        # Code linting
+├── lsp.lua           # LSP configuration
+├── treesitter.lua    # Syntax highlighting
+├── ui.lua            # UI components
+└── util.lua          # Utilities
+```
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="LSP Support" icon="server">
+    Full Language Server Protocol integration with Mason for easy installation
+  </Card>
+  
+  <Card title="Auto-completion" icon="wand-magic-sparkles">
+    Intelligent code completion with nvim-cmp and snippet support
+  </Card>
+  
+  <Card title="Formatting" icon="paintbrush">
+    Automatic code formatting with conform.nvim
+  </Card>
+  
+  <Card title="Linting" icon="circle-check">
+    Real-time code linting and diagnostics
+  </Card>
+  
+  <Card title="Git Integration" icon="code-branch">
+    Gitsigns for inline git blame, hunks, and diff viewing
+  </Card>
+  
+  <Card title="Fuzzy Finding" icon="magnifying-glass">
+    Telescope for files, grep, and symbol search
+  </Card>
+  
+  <Card title="Session Management" icon="floppy-disk">
+    Automatic session persistence and restoration
+  </Card>
+  
+  <Card title="Treesitter" icon="tree">
+    Advanced syntax highlighting and code understanding
+  </Card>
+</CardGroup>
+
+## LSP Configuration
+
+Language servers are managed with Mason and configured for optimal development:
+
+```lua
+return {
+  {
+    "williamboman/mason.nvim",
+    config = function()
+      require("mason").setup()
+    end,
+  },
+  {
+    "williamboman/mason-lspconfig.nvim",
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "lua_ls" },
+      })
+    end,
+  },
+  {
+    "neovim/nvim-lspconfig",
+    config = function()
+      vim.diagnostic.config({
+        underline = true,
+        update_in_insert = false,
+        virtual_text = { spacing = 4, prefix = "●" },
+        severity_sort = true,
+      })
+      
+      vim.lsp.enable("lua_ls")
+    end,
+  },
+}
+```
+
+### Diagnostic Configuration
+
+- **Underline**: Enabled for all diagnostics
+- **Virtual Text**: Shows with bullet prefix and 4px spacing
+- **Severity Sort**: Sorts diagnostics by severity
+- **Update in Insert**: Disabled for less distraction
+
+## Coding Features
+
+### Auto-completion
+
+Powered by nvim-cmp with multiple sources:
+
+```lua
+sources = cmp.config.sources({
+  { name = "nvim_lsp" },   -- LSP completions
+  { name = "luasnip" },    -- Snippet completions
+  { name = "buffer" },     -- Buffer text
+  { name = "path" },       -- File paths
+})
+```
+
+<AccordionGroup>
+  <Accordion title="Completion Keybindings">
+    | Key | Action |
+    |-----|--------|
+    | `Ctrl + Space` | Trigger completion |
+    | `Ctrl + B` | Scroll docs up |
+    | `Ctrl + F` | Scroll docs down |
+    | `Ctrl + E` | Abort completion |
+    | `Enter` | Confirm selection |
+    | `Tab` | Next item / expand snippet |
+    | `Shift + Tab` | Previous item |
+  </Accordion>
+</AccordionGroup>
+
+### Auto Pairs
+
+Automatic bracket, quote, and tag pairing:
+
+```lua
+{
+  "nvim-mini/mini.pairs",
+  opts = {
+    modes = { insert = true, command = true, terminal = false },
+    skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+    skip_ts = { "string" },
+    skip_unbalanced = true,
+    markdown = true,
+  },
+}
+```
+
+### Text Objects
+
+mini.ai extends Neovim's text objects:
+
+- `af`/`if` - Function outer/inner
+- `ac`/`ic` - Class outer/inner
+- `ao`/`io` - Block, conditional, loop
+- `au`/`iu` - Function call
+
+## Editor Options
+
+Core editor settings in `lua/config/options.lua`:
+
+<CodeGroup>
+```lua Indentation
+opt.expandtab = true
+opt.shiftwidth = 2
+opt.tabstop = 2
+opt.softtabstop = 2
+opt.smartindent = true
+```
+
+```lua Display
+opt.number = true
+opt.relativenumber = false
+opt.cursorline = false
+opt.signcolumn = "yes"
+opt.wrap = false
+opt.linebreak = true
+```
+
+```lua Search
+opt.ignorecase = true
+opt.smartcase = true
+opt.hlsearch = true
+opt.incsearch = true
+```
+
+```lua Behavior
+opt.mouse = "a"
+opt.clipboard = "unnamedplus"
+opt.undofile = true
+opt.undolevels = 10000
+opt.timeoutlen = 300
+opt.updatetime = 200
+```
+</CodeGroup>
+
+### Auto-save on Insert Leave
+
+```lua
+vim.api.nvim_create_autocmd("InsertLeave", {
+  group = autosave_group,
+  callback = function()
+    if vim.bo.modifiable and vim.bo.buftype == "" then
+      vim.cmd("silent! w")
+    end
+  end,
+})
+```
+
+<Note>
+  Files are automatically saved when leaving insert mode, reducing the need for manual saves.
+</Note>
+
+## Keymaps
+
+Extensive keybindings organized by functionality in `lua/config/keymaps.lua`:
+
+### Telescope (Fuzzy Finder)
+
+<AccordionGroup>
+  <Accordion title="File Navigation">
+    | Key | Action |
+    |-----|--------|
+    | `<leader>ff` | Find files |
+    | `<leader>fg` | Live grep |
+    | `<leader>fb` | Buffers |
+    | `<leader>fr` | Recent files |
+    | `<leader>fs` | Search in buffer |
+    | `<leader>fw` | Search word under cursor |
+  </Accordion>
+
+  <Accordion title="Code Navigation">
+    | Key | Action |
+    |-----|--------|
+    | `gd` | Go to definition |
+    | `gr` | Go to references |
+    | `gi` | Go to implementation |
+    | `gt` | Go to type definition |
+  </Accordion>
+</AccordionGroup>
+
+### LSP Actions
+
+```lua
+map("n", "K", vim.lsp.buf.hover, { desc = "Hover" })
+map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
+map("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename" })
+map("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show Diagnostics" })
+```
+
+| Key | Action |
+|-----|--------|
+| `K` | Show hover documentation |
+| `<leader>ca` | Code actions |
+| `<leader>cr` | Rename symbol |
+| `<leader>e` | Show diagnostics |
+| `[d` | Previous diagnostic |
+| `]d` | Next diagnostic |
+
+### Git Operations
+
+<AccordionGroup>
+  <Accordion title="Hunk Navigation">
+    | Key | Action |
+    |-----|--------|
+    | `]h` | Next hunk |
+    | `[h` | Previous hunk |
+    | `]H` | Last hunk |
+    | `[H` | First hunk |
+  </Accordion>
+
+  <Accordion title="Hunk Actions">
+    | Key | Action |
+    |-----|--------|
+    | `<leader>ghs` | Stage hunk |
+    | `<leader>ghr` | Reset hunk |
+    | `<leader>ghS` | Stage buffer |
+    | `<leader>ghR` | Reset buffer |
+    | `<leader>ghu` | Undo stage hunk |
+    | `<leader>ghp` | Preview hunk inline |
+    | `<leader>ghb` | Blame line |
+    | `<leader>ghd` | Diff this |
+  </Accordion>
+</AccordionGroup>
+
+### Formatting
+
+```lua
+map("n", "<leader>cf", function()
+  require("conform").format({ bufnr = vim.api.nvim_get_current_buf() })
+end, { desc = "Format Buffer" })
+```
+
+| Key | Action |
+|-----|--------|
+| `<leader>cf` | Format buffer |
+| `<leader>cF` | Format injected languages |
+
+### Trouble (Diagnostics)
+
+| Key | Action |
+|-----|--------|
+| `<leader>xx` | Toggle diagnostics |
+| `<leader>xX` | Buffer diagnostics |
+| `<leader>cs` | Symbols |
+| `<leader>cS` | LSP references |
+| `[q` | Previous item |
+| `]q` | Next item |
+
+### Flash (Quick Navigation)
+
+```lua
+map("n", "s", require("flash").jump, { desc = "Flash" })
+map("n", "S", require("flash").treesitter, { desc = "Flash Treesitter" })
+```
+
+| Key | Action |
+|-----|--------|
+| `s` | Flash jump |
+| `S` | Flash treesitter |
+| `Ctrl + Space` | Treesitter selection |
+
+### Session Management
+
+| Key | Action |
+|-----|--------|
+| `<leader>qs` | Restore session |
+| `<leader>qS` | Select session |
+| `<leader>ql` | Restore last session |
+| `<leader>qd` | Don't save session |
+
+### Todo Comments
+
+| Key | Action |
+|-----|--------|
+| `]t` | Next todo comment |
+| `[t` | Previous todo comment |
+| `<leader>xt` | Todo list (Trouble) |
+| `<leader>st` | Search todos (Telescope) |
+
+## Auto Commands
+
+Several auto commands enhance the editing experience:
+
+### Highlight on Yank
+
+```lua
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    vim.highlight.on_yank({ higroup = "Visual", timeout = 200 })
+  end,
+})
+```
+
+### Remove Trailing Whitespace
+
+```lua
+vim.api.nvim_create_autocmd("BufWritePre", {
+  callback = function()
+    vim.cmd([[%s/\s\+$//e]])
+  end,
+})
+```
+
+### Restore Cursor Position
+
+```lua
+vim.api.nvim_create_autocmd("BufReadPost", {
+  callback = function()
+    local line = vim.fn.line("'\"")
+    if line > 1 and line <= vim.fn.line("$") then
+      vim.cmd('exe "normal! g\'\\""')
+    end
+  end,
+})
+```
+
+## Snippets
+
+LuaSnip provides snippet expansion with friendly-snippets:
+
+```lua
+{
+  "L3MON4D3/LuaSnip",
+  version = "v2.*",
+  build = "make install_jsregexp",
+  opts = {
+    history = true,
+    delete_check_events = "TextChanged",
+  },
+}
+```
+
+| Key | Action |
+|-----|--------|
+| `Ctrl + K` | Expand/jump forward |
+| `Ctrl + J` | Jump backward |
+
+<Tip>
+  Use `<leader>ll` to open Lazy plugin manager and `<leader>lm` to open Mason for LSP/tool installation.
+</Tip>
+
+## Plugin Manager
+
+Lazy.nvim handles all plugin management with lazy loading for fast startup times. Plugins are automatically installed on first launch.
+
+<Warning>
+  Make sure to run `:checkhealth` after installation to verify all dependencies are correctly installed.
+</Warning>

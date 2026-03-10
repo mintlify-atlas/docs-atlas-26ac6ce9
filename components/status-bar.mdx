@@ -1,0 +1,467 @@
+---
+title: 'Status Bar'
+description: 'Waybar - A highly customizable Wayland bar'
+icon: 'window-restore'
+---
+
+## Waybar Overview
+
+Waybar is a highly customizable status bar for Wayland compositors. This configuration provides a clean, informative bar with workspace indicators, window title, system metrics, and quick action buttons.
+
+## Configuration
+
+Waybar is configured through two main files:
+
+- `config.jsonc` - Module layout and behavior
+- `style.css` - Visual styling and colors
+
+### Layout Structure
+
+```json
+{
+  "layer": "top",
+  "position": "top",
+  "height": 42,
+  "spacing": 0,
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces",
+    "hyprland/window"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "pulseaudio",
+    "network",
+    "group/hardware",
+    "tray",
+    "custom/power"
+  ]
+}
+```
+
+<CardGroup cols={3}>
+  <Card title="Left Section" icon="align-left">
+    Launcher, workspaces, and active window
+  </Card>
+  
+  <Card title="Center Section" icon="align-center">
+    Date and time display
+  </Card>
+  
+  <Card title="Right Section" icon="align-right">
+    System status and controls
+  </Card>
+</CardGroup>
+
+## Modules and Widgets
+
+### Custom Launcher
+
+Application launcher button that opens Rofi:
+
+```json
+"custom/launcher": {
+  "format": "󰣇",
+  "on-click": "rofi -show drun",
+  "tooltip": false
+}
+```
+
+<Note>
+  Click the launcher icon to open Rofi application menu.
+</Note>
+
+### Hyprland Workspaces
+
+Interactive workspace indicators:
+
+```json
+"hyprland/workspaces": {
+  "on-click": "activate",
+  "format": "{icon}",
+  "format-icons": {
+    "default": "",
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5",
+    "6": "6",
+    "7": "7",
+    "8": "8",
+    "9": "9",
+    "10": "0",
+    "active": "󱓻"
+  }
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Workspace States">
+    - **Empty**: Dimmed opacity (0.4)
+    - **Occupied**: Normal color (subtext0)
+    - **Focused**: Bold purple/mauve color
+    - **Urgent**: Red with blinking animation
+  </Accordion>
+</AccordionGroup>
+
+### Active Window
+
+Displays the title of the currently focused window:
+
+```json
+"hyprland/window": {
+  "format": "󰖲 {title}",
+  "max-length": 60,
+  "separate-outputs": true
+}
+```
+
+### Clock
+
+Central clock with date information:
+
+```json
+"clock": {
+  "interval": 1,
+  "format": "{:%A %H:%M:%S}",
+  "format-alt": "{:%d %B %V %Y}",
+  "tooltip": false
+}
+```
+
+<Tip>
+  Click the clock to toggle between time (with day name) and full date display.
+</Tip>
+
+### Audio (PulseAudio)
+
+Volume control with visual feedback:
+
+```json
+"pulseaudio": {
+  "format": "{icon} {volume}%",
+  "format-muted": "󰝟 {volume}%",
+  "format-icons": {
+    "default": ["󰕿", "󰖀", "󰕾"],
+    "headphone": "",
+    "headset": "󰋎"
+  },
+  "scroll-step": 5,
+  "on-click": "pavucontrol",
+  "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Left Click" icon="mouse-pointer">
+    Open PulseAudio volume control (pavucontrol)
+  </Card>
+  
+  <Card title="Right Click" icon="hand-pointer">
+    Toggle mute/unmute
+  </Card>
+  
+  <Card title="Scroll Wheel" icon="arrows-up-down">
+    Adjust volume in 5% increments
+  </Card>
+  
+  <Card title="Visual States" icon="icons">
+    Different icons for speakers, headphones, and headsets
+  </Card>
+</CardGroup>
+
+### Network
+
+Network connectivity status:
+
+```json
+"network": {
+  "interface": "wl*",
+  "format-wifi": "⇅ {signalStrength}%",
+  "format-ethernet": "⇅",
+  "format-disconnected": "⊘",
+  "tooltip-format-wifi": "{essid}",
+  "on-click": "kitty -e nmtui"
+}
+```
+
+- **WiFi**: Shows signal strength percentage
+- **Ethernet**: Simple connected indicator
+- **Disconnected**: Warning symbol
+- **Click**: Opens NetworkManager TUI in Kitty
+
+### Hardware Group
+
+Collapsible CPU and memory monitors:
+
+```json
+"group/hardware": {
+  "orientation": "horizontal",
+  "drawer": {
+    "transition-duration": 300,
+    "children-class": "not-memory"
+  },
+  "modules": ["cpu", "memory"]
+}
+```
+
+#### CPU Monitor
+
+```json
+"cpu": {
+  "interval": 2,
+  "format": "󰍛 {usage}%",
+  "states": {
+    "warning": 70,
+    "critical": 90
+  },
+  "on-click": "kitty -e btop"
+}
+```
+
+<AccordionGroup>
+  <Accordion title="CPU States">
+    | State | Threshold | Color |
+    |-------|-----------|-------|
+    | Normal | < 70% | Blue |
+    | Warning | 70-90% | Yellow |
+    | Critical | > 90% | Red |
+  </Accordion>
+</AccordionGroup>
+
+#### Memory Monitor
+
+```json
+"memory": {
+  "interval": 5,
+  "format": "󰟜 {percentage}%",
+  "states": {
+    "warning": 70,
+    "critical": 90
+  },
+  "tooltip-format": "{used:0.1f}G / {total:0.1f}G",
+  "on-click": "kitty -e btop"
+}
+```
+
+<Note>
+  Click either CPU or memory to launch btop, an interactive system monitor.
+</Note>
+
+### System Tray
+
+Standard system tray for application icons:
+
+```json
+"tray": {
+  "icon-size": 16,
+  "spacing": 8
+}
+```
+
+### Power Menu
+
+Power/logout menu launcher:
+
+```json
+"custom/power": {
+  "format": "⏻",
+  "on-click": "wlogout -b 5",
+  "tooltip": false
+}
+```
+
+## Styling
+
+Waybar uses Catppuccin color scheme for a cohesive look with the rest of the desktop.
+
+### Color Variables
+
+```css
+@define-color bg #1e1e2e;
+@define-color bg_alt #313244;
+@define-color surface0 #45475a;
+@define-color mauve #cba6f7;
+@define-color blue #89b4fa;
+@define-color red #f38ba8;
+@define-color green #a6e3a1;
+@define-color yellow #f9e2af;
+@define-color teal #94e2d5;
+@define-color text #cdd6f4;
+@define-color subtext0 #a6adc8;
+```
+
+### Base Styling
+
+```css
+window#waybar {
+  background-color: @bg;
+  border-bottom: 1px solid @surface0;
+}
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "Roboto", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+```
+
+### Workspace Styling
+
+<CodeGroup>
+```css Normal
+#workspaces button {
+  color: @subtext0;
+  background: transparent;
+  padding: 4px 10px;
+}
+```
+
+```css Focused
+#workspaces button.focused {
+  color: @mauve;
+  font-weight: 700;
+}
+```
+
+```css Hover
+#workspaces button:hover {
+  background: @surface0;
+  color: @text;
+}
+```
+
+```css Urgent
+#workspaces button.urgent {
+  color: @red;
+  animation: blink 1s infinite;
+}
+```
+</CodeGroup>
+
+### Module Colors
+
+Each module has semantic coloring:
+
+```css
+#pulseaudio { color: @yellow; }
+#pulseaudio.muted { color: @subtext0; }
+
+#network { color: @green; }
+#network.disconnected { color: @red; }
+
+#cpu { color: @blue; }
+#cpu.warning { color: @yellow; }
+#cpu.critical { color: @red; }
+
+#memory { color: @green; }
+#memory.warning { color: @yellow; }
+#memory.critical { color: @red; }
+
+#custom-launcher { color: @mauve; }
+#custom-power { color: @red; }
+```
+
+### Hover Effects
+
+```css
+#pulseaudio:hover,
+#network:hover,
+#cpu:hover,
+#memory:hover,
+#clock:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+#custom-launcher:hover {
+  background-color: @mauve;
+  color: @bg;
+}
+
+#custom-power:hover {
+  background-color: @red;
+  color: @bg;
+}
+```
+
+## Customization Options
+
+### Changing Module Order
+
+Edit the modules arrays in `config.jsonc`:
+
+```json
+"modules-right": [
+  "network",      // Reorder by changing position
+  "pulseaudio",
+  "group/hardware",
+  "tray",
+  "custom/power"
+]
+```
+
+### Adding New Modules
+
+Waybar supports many built-in modules:
+
+- `battery` - Battery status
+- `backlight` - Screen brightness
+- `bluetooth` - Bluetooth status
+- `idle_inhibitor` - Prevent idle/sleep
+- `temperature` - System temperature
+- `disk` - Disk usage
+
+Example battery module:
+
+```json
+"battery": {
+  "format": "{icon} {capacity}%",
+  "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+  "format-charging": "󰂄 {capacity}%"
+}
+```
+
+### Custom Scripts
+
+Create custom modules with scripts:
+
+```json
+"custom/weather": {
+  "exec": "~/.config/waybar/scripts/weather.sh",
+  "interval": 1800,
+  "return-type": "json"
+}
+```
+
+<Tip>
+  Reload Waybar with `Super + Shift + R` (Hyprland reload) or `killall waybar && waybar &` to apply configuration changes.
+</Tip>
+
+## Tooltips
+
+Tooltips provide additional information on hover:
+
+```css
+tooltip {
+  background-color: @bg_alt;
+  color: @text;
+  border-radius: 4px;
+  border: 1px solid @surface0;
+  padding: 4px 8px;
+}
+```
+
+Many modules include tooltip data (network SSID, memory usage details, etc.).
+
+## Performance
+
+- Module updates are throttled with configurable intervals
+- CSS transitions are GPU-accelerated
+- Minimal resource usage even with multiple active modules
+
+<Warning>
+  Avoid setting very short update intervals (< 1 second) on CPU/memory modules to prevent excessive resource usage.
+</Warning>

@@ -1,0 +1,280 @@
+---
+title: Installation
+description: Complete installation guide for Hyprland dotfiles on Arch Linux
+---
+
+## Prerequisites
+
+Before installing these dotfiles, ensure your system meets the following requirements:
+
+<CardGroup cols={2}>
+  <Card title="Operating System" icon="linux">
+    Arch Linux or Arch-based distributions (tested on EndeavourOS)
+  </Card>
+  <Card title="Package Manager" icon="box">
+    Pacman + Paru (AUR helper)
+  </Card>
+  <Card title="Version Control" icon="code-branch">
+    Git installed and configured
+  </Card>
+  <Card title="Display Server" icon="display">
+    Ready to switch to Wayland/Hyprland
+  </Card>
+</CardGroup>
+
+<Note>
+  These dotfiles are **experimental** and actively developed. Always review configurations before installation.
+</Note>
+
+### Installing Paru
+
+If you don't have Paru installed yet:
+
+```bash
+sudo pacman -S --needed base-devel
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+```
+
+## Installation Process
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the dotfiles repository with all submodules:
+
+    ```bash
+    git clone --recurse-submodules https://github.com/ParaDevOne/dotfiles ~/dotfiles
+    ```
+
+    <Tip>
+      The `--recurse-submodules` flag is important as it includes Dotbot, the installation framework.
+    </Tip>
+  </Step>
+
+  <Step title="Navigate to Directory">
+    Change into the dotfiles directory:
+
+    ```bash
+    cd ~/dotfiles
+    ```
+  </Step>
+
+  <Step title="Run Installation Script">
+    Execute the installation script:
+
+    ```bash
+    ./install
+    ```
+
+    The script will:
+    - Check for missing packages from `packages.txt`
+    - Install any missing packages using Paru
+    - Create necessary directories
+    - Symlink configuration files to their proper locations
+  </Step>
+</Steps>
+
+## What Gets Installed
+
+The installation process installs and configures the following components:
+
+### Core Components
+
+<AccordionGroup>
+  <Accordion title="Hyprland & Wayland Ecosystem">
+    - **hyprland** - Dynamic tiling Wayland compositor
+    - **hypridle** - Idle daemon for Hyprland
+    - **hyprlock** - Screen locker for Hyprland
+    - **hyprshot** - Screenshot utility
+    - **xdg-desktop-portal-hyprland** - Desktop portal implementation
+    - **waybar** - Highly customizable status bar
+    - **rofi** - Application launcher
+    - **wlogout** - Logout menu
+    - **swaync** - Notification daemon
+    - **mako** - Notification daemon
+  </Accordion>
+
+  <Accordion title="Terminal & Shell">
+    - **kitty** - GPU-accelerated terminal emulator
+    - **zsh** - Z shell
+    - **zsh-antidote** - Plugin manager for Zsh
+  </Accordion>
+
+  <Accordion title="Development Tools">
+    - **neovim** - Hyperextensible Vim-based text editor
+    - **lazygit** - Terminal UI for git commands
+    - **yazi** - Blazing fast terminal file manager
+  </Accordion>
+
+  <Accordion title="System Utilities">
+    - **brightnessctl** - Screen brightness control
+    - **pavucontrol** - PulseAudio volume control
+    - **polkit-gnome** - Authentication agent
+    - **btop** - Resource monitor
+    - **bat** - Cat clone with syntax highlighting
+    - **eza** - Modern ls replacement
+    - **fastfetch** - System information tool
+    - **jq** - JSON processor
+    - **wl-clipboard** - Wayland clipboard utilities
+  </Accordion>
+
+  <Accordion title="Graphics & Screenshots">
+    - **grim** - Screenshot utility for Wayland
+    - **slurp** - Select a region in Wayland
+    - **satty** - Screenshot annotation tool
+    - **imv** - Image viewer for Wayland
+    - **awww-bin** - Wallpaper manager
+  </Accordion>
+
+  <Accordion title="Applications">
+    - **brave-bin** - Brave browser
+    - **xdg-user-dirs** - User directories management
+  </Accordion>
+
+  <Accordion title="Fonts & Themes">
+    - **noto-fonts** - Google Noto fonts family
+    - **noto-fonts-cjk** - CJK (Chinese, Japanese, Korean) fonts
+    - **noto-fonts-emoji** - Emoji fonts
+    - **noto-fonts-extra** - Additional Noto fonts
+    - **ttf-jetbrains-mono-nerd** - JetBrains Mono Nerd Font
+    - **ttf-dejavu** - DejaVu fonts
+    - **ttf-bitstream-vera** - Bitstream Vera fonts
+    - **ttf-liberation** - Liberation fonts
+    - **ttf-opensans** - Open Sans font
+    - **inter-font** - Inter font family
+    - **bibata-cursor-theme-bin** - Bibata cursor theme
+    - **papirus-icon-theme** - Papirus icon theme
+  </Accordion>
+
+  <Accordion title="Qt Support">
+    - **qt6-wayland** - Qt6 Wayland support
+  </Accordion>
+</AccordionGroup>
+
+### Configuration Structure
+
+The installation creates symlinks for the following configurations:
+
+```yaml
+# Home directory
+~/.zshenv
+
+# Applications (WM-agnostic)
+~/.config/Code/User/settings.json
+~/.config/nvim
+~/.config/kitty
+~/.config/fastfetch
+
+# Hyprland ecosystem
+~/.config/hypr
+~/.config/waybar
+~/.config/mako
+~/.config/wlogout
+~/.config/rofi
+
+# System configuration
+~/.config/environment.d
+~/.config/paru
+~/.config/zsh
+```
+
+<Note>
+  All configurations are symlinked, not copied. This means changes to files in `~/dotfiles` will automatically reflect in your system.
+</Note>
+
+## Post-Installation Steps
+
+<Steps>
+  <Step title="Logout of Current Session">
+    Save your work and logout of your current desktop environment.
+  </Step>
+
+  <Step title="Select Hyprland Session">
+    At your display manager login screen, select "Hyprland" as your session type.
+  </Step>
+
+  <Step title="Login">
+    Enter your credentials and login to start Hyprland.
+  </Step>
+
+  <Step title="Set Wallpaper">
+    The default wallpaper is configured in the autostart. To change it:
+
+    ```bash
+    awww img ~/path/to/your/wallpaper.jpg
+    ```
+  </Step>
+</Steps>
+
+## Verification
+
+After logging in, verify your installation:
+
+<CodeGroup>
+```bash Terminal
+# Check if Hyprland is running
+echo $XDG_CURRENT_DESKTOP
+# Should output: Hyprland
+```
+
+```bash Waybar
+# Waybar should be visible at the top of your screen
+# If not, start it manually:
+waybar
+```
+
+```bash Test Terminal
+# Open a terminal with Super + Return
+# Check shell
+echo $SHELL
+# Should output: /bin/zsh
+```
+</CodeGroup>
+
+<Warning>
+  If you encounter permission errors, ensure the installation script has execute permissions:
+  ```bash
+  chmod +x ~/dotfiles/install
+  ```
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Black screen after login">
+    Press `Ctrl + Alt + F2` to switch to a TTY and check logs:
+    ```bash
+    journalctl --user -xe | grep hyprland
+    ```
+  </Accordion>
+
+  <Accordion title="Missing packages">
+    Run the installation again to install any missing packages:
+    ```bash
+    cd ~/dotfiles && ./install
+    ```
+  </Accordion>
+
+  <Accordion title="Waybar not showing">
+    Check if waybar is running:
+    ```bash
+    pgrep waybar
+    ```
+    If not, start it manually:
+    ```bash
+    waybar &
+    ```
+  </Accordion>
+
+  <Accordion title="Broken symlinks">
+    The installation script automatically relinks files. Run it again to fix broken symlinks:
+    ```bash
+    cd ~/dotfiles && ./install
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+Now that you have Hyprland installed, check out the [Quick Start](/quick-start) guide to learn essential keybindings and get productive quickly.

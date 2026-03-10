@@ -1,0 +1,138 @@
+---
+title: "Introduction"
+description: "Modern, modular Linux desktop configuration for Arch Linux featuring Hyprland, Neovim, and curated developer tools"
+---
+
+<img
+  className="block"
+  src="https://img.shields.io/badge/OS-Arch%20Linux-blue.svg"
+  alt="Arch Linux Badge"
+/>
+
+# Hyprland Dotfiles
+
+A comprehensive, modular dotfiles configuration designed for Arch Linux and Arch-based distributions. This setup provides a complete, aesthetically pleasing desktop environment powered by Hyprland with carefully selected applications and tools.
+
+<Note>
+  **Experimental Status**: This configuration is actively developed and may contain breaking changes. Always review changes before updating.
+</Note>
+
+## What's Included
+
+This dotfiles collection provides a complete desktop environment with the following components:
+
+<CardGroup cols={2}>
+  <Card title="Hyprland Window Manager" icon="window-maximize" href="/components/window-manager">
+    Modern Wayland compositor with smooth animations and efficient workspace management
+  </Card>
+  <Card title="Neovim Editor" icon="code" href="/components/editor">
+    LazyVim-based configuration with LSP support and modern plugin ecosystem
+  </Card>
+  <Card title="Kitty Terminal" icon="terminal" href="/components/terminal">
+    GPU-accelerated terminal with custom themes and keybindings
+  </Card>
+  <Card title="Waybar Status Bar" icon="chart-line" href="/components/status-bar">
+    Customizable status bar with system monitoring and workspace indicators
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Modular Configuration" icon="puzzle-piece">
+    Organized structure with separate modules for window manager, applications, and system settings
+  </Card>
+  <Card title="Automated Installation" icon="rocket">
+    Single command installation using Dotbot with automatic package management via Paru
+  </Card>
+  <Card title="Coordinated Theming" icon="palette">
+    Consistent visual design across all applications and components
+  </Card>
+  <Card title="Developer-Focused" icon="laptop-code">
+    Optimized for development workflows with modern tooling and shortcuts
+  </Card>
+</CardGroup>
+
+## System Requirements
+
+<AccordionGroup>
+  <Accordion title="Operating System">
+    - **Primary**: Arch Linux
+    - **Tested on**: EndeavourOS
+    - **Compatible**: Other Arch-based distributions
+  </Accordion>
+  
+  <Accordion title="Package Managers">
+    - **Pacman**: Official Arch package manager (required)
+    - **Paru**: AUR helper for community packages (installed automatically)
+  </Accordion>
+  
+  <Accordion title="Prerequisites">
+    - Git for cloning the repository
+    - Internet connection for package installation
+    - Basic familiarity with terminal usage
+  </Accordion>
+</AccordionGroup>
+
+## Quick Start
+
+Get up and running in minutes with these simple steps:
+
+<Steps>
+  <Step title="Clone the Repository">
+    ```bash
+    git clone --recurse-submodules https://github.com/ParaDevOne/dotfiles ~/dotfiles
+    ```
+  </Step>
+  
+  <Step title="Navigate to Directory">
+    ```bash
+    cd ~/dotfiles
+    ```
+  </Step>
+  
+  <Step title="Run Installation">
+    ```bash
+    ./install
+    ```
+  </Step>
+</Steps>
+
+The installation script will automatically:
+- Install missing packages from `packages.txt`
+- Create necessary directories
+- Symlink configuration files to the appropriate locations
+
+## Repository Structure
+
+The dotfiles are organized into logical sections:
+
+- **`home/`** — Files that must exist in `$HOME` (`.zshenv`, `.bashrc`, etc.)
+- **`dots/`** — WM-agnostic application configs (Code, Kitty, Fastfetch, Neovim)
+- **`hyprland/`** — Wayland/Hyprland ecosystem (replaceable with other window managers)
+- **`system/`** — OS-level configuration in `~/.config`
+
+<Card title="Explore the Structure" icon="folder-tree" href="/reference/structure">
+  Learn about the detailed directory organization and file purposes
+</Card>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Detailed installation instructions and system setup
+  </Card>
+  <Card title="Quick Start" icon="bolt" href="/quick-start">
+    Get productive immediately with essential configurations
+  </Card>
+  <Card title="Customization" icon="wrench" href="/guides/customization">
+    Personalize your setup to match your preferences
+  </Card>
+  <Card title="Keybindings" icon="keyboard" href="/guides/keybindings">
+    Master the keyboard shortcuts and window management
+  </Card>
+</CardGroup>
+
+## License
+
+This project is licensed under the MIT License. Feel free to use and modify for your own setup.

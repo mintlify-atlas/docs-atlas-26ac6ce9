@@ -1,0 +1,388 @@
+---
+title: Environment Variables
+description: Complete reference of environment variables and Hyprland variables
+icon: code
+---
+
+## Overview
+
+Environment variables are configured in multiple locations depending on their scope and purpose. This page documents all environment variables used across the dotfiles.
+
+## Shell Environment (zshenv)
+
+Defined in `home/zshenv` - loaded first by ZSH for all shells.
+
+### Less Pager Colors
+
+Customizes the appearance of the `less` pager with color support.
+
+```bash
+export LESS_TERMCAP_mb=$'\e[1;31m'    # Begin blinking
+export LESS_TERMCAP_md=$'\e[1;36m'    # Begin bold
+export LESS_TERMCAP_me=$'\e[0m'       # End mode
+export LESS_TERMCAP_se=$'\e[0m'       # End standout-mode
+export LESS_TERMCAP_so=$'\e[30;43m'   # Begin standout-mode
+export LESS_TERMCAP_ue=$'\e[0m'       # End underline
+export LESS_TERMCAP_us=$'\e[4;32m'    # Begin underline
+```
+
+### PATH Configuration
+
+Extends PATH with user binaries and development tools.
+
+```bash
+typeset -U path
+path=(
+    "$HOME/.local/bin"
+    "$CARGO_HOME/bin"
+    "$GOBIN"
+    "$NPM_CONFIG_PREFIX/bin"
+    "$PYTHONUSERBASE/bin"
+    "/usr/lib/ccache/bin"
+    $path
+)
+```
+
+### ZSH Optimization
+
+```bash
+skip_global_compinit=1    # Skip global compinit for faster startup
+```
+
+## systemd User Environment
+
+Defined in `system/environment.d/` - loaded by systemd user session.
+
+### XDG Base Directory (envvarsuser.conf)
+
+Follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
+
+```bash
+# XDG Base Directory Specification
+XDG_CONFIG_HOME=$HOME/.config
+XDG_CACHE_HOME=$HOME/.cache
+XDG_DATA_HOME=$HOME/.local/share
+XDG_STATE_HOME=$HOME/.local/state
+```
+
+| Variable | Default Value | Purpose |
+|----------|---------------|----------|
+| `XDG_CONFIG_HOME` | `~/.config` | User-specific configuration files |
+| `XDG_CACHE_HOME` | `~/.cache` | User-specific cache data |
+| `XDG_DATA_HOME` | `~/.local/share` | User-specific data files |
+| `XDG_STATE_HOME` | `~/.local/state` | User-specific state data |
+
+### Application Directories
+
+```bash
+# ZSH configuration directory
+ZDOTDIR=$XDG_CONFIG_HOME/zsh
+WINEPREFIX=$XDG_DATA_HOME/wineprefixes/default
+```
+
+### Default Programs
+
+```bash
+EDITOR=nvim
+VISUAL=nvim
+TERMINAL=kitty
+BROWSER=brave
+PAGER="less -R"
+```
+
+| Variable | Value | Purpose |
+|----------|-------|----------|
+| `EDITOR` | `nvim` | Default text editor |
+| `VISUAL` | `nvim` | Visual editor (for programs that need GUI editor) |
+| `TERMINAL` | `kitty` | Default terminal emulator |
+| `BROWSER` | `brave` | Default web browser |
+| `PAGER` | `less -R` | Default pager with raw control characters |
+
+### Less Pager Configuration
+
+```bash
+LESS='-R --mouse --incsearch'
+LESSHISTFILE=$XDG_STATE_HOME/less/history
+```
+
+### Development Tool Directories
+
+Keeps development tools organized within XDG directories.
+
+```bash
+# Rust
+CARGO_HOME=$XDG_DATA_HOME/cargo
+RUSTUP_HOME=$XDG_DATA_HOME/rustup
+
+# Go
+GOPATH=$XDG_DATA_HOME/go
+GOBIN=$XDG_DATA_HOME/go/bin
+
+# Node.js / NPM
+NPM_CONFIG_CACHE=$XDG_CACHE_HOME/npm
+NPM_CONFIG_PREFIX=$XDG_DATA_HOME/npm
+
+# Python
+PYTHONUSERBASE=$XDG_DATA_HOME/python
+PYTHONPYCACHEPREFIX=$XDG_CACHE_HOME/python
+```
+
+| Language | Variables | Purpose |
+|----------|-----------|----------|
+| **Rust** | `CARGO_HOME`, `RUSTUP_HOME` | Cargo packages and Rustup toolchains |
+| **Go** | `GOPATH`, `GOBIN` | Go workspace and binaries |
+| **Node.js** | `NPM_CONFIG_CACHE`, `NPM_CONFIG_PREFIX` | NPM cache and global packages |
+| **Python** | `PYTHONUSERBASE`, `PYTHONPYCACHEPREFIX` | User packages and bytecode cache |
+
+## Rendering & Hardware (rendering.conf)
+
+NVIDIA GPU-specific configuration for hardware acceleration.
+
+```bash
+# Font rendering and hardware cursors
+WLR_NO_HARDWARE_CURSORS=1
+FREETYPE_PROPERTIES="cff:no-stem-darkening=0 autofitter:no-stem-darkening=0"
+
+# Video acceleration (NVIDIA)
+LIBVA_DRIVER_NAME=nvidia
+NVD_BACKEND=direct
+VDPAU_DRIVER=nvidia
+__GLX_VENDOR_LIBRARY_NAME=nvidia
+```
+
+| Variable | Value | Purpose |
+|----------|-------|----------|
+| `WLR_NO_HARDWARE_CURSORS` | `1` | Disable hardware cursors (NVIDIA workaround) |
+| `FREETYPE_PROPERTIES` | Font rendering settings | Disable stem darkening for better rendering |
+| `LIBVA_DRIVER_NAME` | `nvidia` | VA-API driver for NVIDIA |
+| `NVD_BACKEND` | `direct` | NVIDIA direct backend |
+| `VDPAU_DRIVER` | `nvidia` | VDPAU driver for video acceleration |
+| `__GLX_VENDOR_LIBRARY_NAME` | `nvidia` | GLX vendor library |
+
+## Wayland Environment (wayland.conf)
+
+Wayland-specific environment variables for proper application behavior.
+
+```bash
+# Wayland session
+WAYLAND=1
+XDG_SESSION_TYPE=wayland
+GBM_BACKEND=nvidia-drm
+
+# Qt
+QT_QPA_PLATFORM="wayland;xcb"
+QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+QT_QPA_PLATFORMTHEME=qt6ct
+
+# GTK
+GDK_BACKEND=wayland
+GDK_DPI_SCALE=1
+
+# Mozilla
+MOZ_ENABLE_WAYLAND=1
+MOZ_DBUS_REMOTE=1
+MOZ_WEBRENDER=1
+MOZ_DISABLE_RDD_SANDBOX=1
+
+# Electron
+ELECTRON_OZONE_PLATFORM_HINT=wayland
+
+# Java
+_JAVA_AWT_WM_NONREPARENTING=1
+AWT_TOOLKIT=MToolkit
+
+# SDL
+SDL_VIDEODRIVER=wayland
+
+# Other toolkits
+CLUTTER_BACKEND=wayland
+ECORE_EVAS_ENGINE=wayland_egl
+ELM_ENGINE=wayland_egl
+BEMENU_BACKEND=wayland
+WINIT_UNIX_BACKEND=wayland
+EGL_PLATFORM=wayland
+```
+
+### Wayland Variables by Toolkit
+
+<AccordionGroup>
+  <Accordion title="Qt Applications">
+    ```bash
+    QT_QPA_PLATFORM="wayland;xcb"              # Use Wayland, fallback to XCB
+    QT_WAYLAND_DISABLE_WINDOWDECORATION=1      # Disable Qt window decorations
+    QT_QPA_PLATFORMTHEME=qt6ct                 # Use qt6ct for theming
+    ```
+  </Accordion>
+
+  <Accordion title="GTK Applications">
+    ```bash
+    GDK_BACKEND=wayland                        # Use Wayland backend
+    GDK_DPI_SCALE=1                            # DPI scaling factor
+    ```
+  </Accordion>
+
+  <Accordion title="Mozilla (Firefox)">
+    ```bash
+    MOZ_ENABLE_WAYLAND=1                       # Enable Wayland support
+    MOZ_DBUS_REMOTE=1                          # Enable D-Bus remote
+    MOZ_WEBRENDER=1                            # Enable WebRender
+    MOZ_DISABLE_RDD_SANDBOX=1                  # Disable RDD sandbox
+    ```
+  </Accordion>
+
+  <Accordion title="Electron Apps">
+    ```bash
+    ELECTRON_OZONE_PLATFORM_HINT=wayland       # Use Wayland Ozone platform
+    ```
+  </Accordion>
+
+  <Accordion title="Java Applications">
+    ```bash
+    _JAVA_AWT_WM_NONREPARENTING=1              # Fix for tiling WMs
+    AWT_TOOLKIT=MToolkit                       # Use MToolkit
+    ```
+  </Accordion>
+
+  <Accordion title="SDL / Games">
+    ```bash
+    SDL_VIDEODRIVER=wayland                    # Use Wayland video driver
+    ```
+  </Accordion>
+
+  <Accordion title="Other Toolkits">
+    ```bash
+    CLUTTER_BACKEND=wayland
+    ECORE_EVAS_ENGINE=wayland_egl
+    ELM_ENGINE=wayland_egl
+    BEMENU_BACKEND=wayland
+    WINIT_UNIX_BACKEND=wayland
+    EGL_PLATFORM=wayland
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Hyprland Variables (vars.conf)
+
+Hyprland-specific variable definitions used in keybindings and configuration.
+
+### Application Variables
+
+```bash
+$terminal = kitty
+$fileManager = nemo
+$menu = rofi -show drun
+$lock = hyprlock
+$browser = brave
+```
+
+| Variable | Value | Usage |
+|----------|-------|-------|
+| `$terminal` | `kitty` | Default terminal emulator |
+| `$fileManager` | `nemo` | Default file manager |
+| `$menu` | `rofi -show drun` | Application launcher |
+| `$lock` | `hyprlock` | Screen locker |
+| `$browser` | `brave` | Web browser |
+
+### Key Modifier Variables
+
+```bash
+$mainMod = SUPER
+$ctrlMod = Control_L
+$altMod = ALT_L
+```
+
+| Variable | Value | Purpose |
+|----------|-------|----------|
+| `$mainMod` | `SUPER` | Primary modifier (Windows/Super key) |
+| `$ctrlMod` | `Control_L` | Control key |
+| `$altMod` | `ALT_L` | Alt key |
+
+### Color Variables
+
+Based on Catppuccin color scheme.
+
+```bash
+# Accent Colors
+$mauve = rgba(c6a0f6ff)
+$blue = rgba(8aadf4ff)
+$red = rgba(ed8796ff)
+$green = rgba(a6da95ff)
+$peach = rgba(f5a97fff)
+
+# Backgrounds
+$mantle = rgba(1a1a1aee)
+$base = rgba(24273aff)
+$surface0 = rgba(49495aff)
+$surface1 = rgba(565a7aff)
+$surface2 = rgba(6d7899ff)
+
+# Text
+$text = rgba(cad1d9ff)
+$subtext0 = rgba(a5adcbff)
+$subtext1 = rgba(b8c5d6ff)
+```
+
+<CardGroup cols={3}>
+  <Card title="Accent Colors" icon="palette">
+    - Mauve
+    - Blue
+    - Red
+    - Green
+    - Peach
+  </Card>
+  <Card title="Backgrounds" icon="square">
+    - Mantle
+    - Base
+    - Surface 0/1/2
+  </Card>
+  <Card title="Text Colors" icon="font">
+    - Text
+    - Subtext 0
+    - Subtext 1
+  </Card>
+</CardGroup>
+
+## Hyprland Environment (env.conf)
+
+Environment variables specific to Hyprland window manager.
+
+```bash
+# Cursor theme
+env = HYPRCURSOR_THEME,Bibata-Modern-Classic
+env = HYPRCURSOR_SIZE,24
+env = XCURSOR_THEME,Bibata-Modern-Classic
+env = XCURSOR_SIZE,24
+
+# Plugin permissions
+permission = /usr/(bin|local/bin)/hyprpm, plugin, allow
+```
+
+| Variable | Value | Purpose |
+|----------|-------|----------|
+| `HYPRCURSOR_THEME` | `Bibata-Modern-Classic` | Hyprland cursor theme |
+| `HYPRCURSOR_SIZE` | `24` | Cursor size in Hyprland |
+| `XCURSOR_THEME` | `Bibata-Modern-Classic` | X11 cursor theme (fallback) |
+| `XCURSOR_SIZE` | `24` | X11 cursor size |
+
+<Info>
+The `permission` directive allows hyprpm (Hyprland plugin manager) to load plugins.
+</Info>
+
+## Loading Order
+
+1. **systemd environment.d** - Loaded by systemd user session
+   - `envvarsuser.conf`
+   - `rendering.conf`
+   - `wayland.conf`
+
+2. **zshenv** - Loaded by ZSH for all shells
+   - Imports systemd environment
+   - Adds PATH entries
+
+3. **Hyprland config** - Loaded when Hyprland starts
+   - `vars.conf` - Variable definitions
+   - `env.conf` - Hyprland environment
+
+<Tip>
+The `zshenv` file explicitly imports systemd user environment variables at startup to ensure consistency between graphical and terminal sessions.
+</Tip>

@@ -1,0 +1,436 @@
+---
+title: 'Notifications'
+description: 'Mako - A lightweight notification daemon for Wayland'
+icon: 'bell'
+---
+
+## Mako Notification Daemon
+
+Mako is a lightweight notification daemon designed specifically for Wayland compositors. It provides elegant, customizable notifications that integrate seamlessly with the Hyprland desktop environment.
+
+## Configuration
+
+Mako is configured through a simple text file at `~/.config/mako/config`.
+
+### Basic Configuration
+
+```conf
+background-color=#1e1e2e
+text-color=#cdd6f4
+border-color=#b4befe
+border-size=2
+border-radius=10
+default-timeout=5000
+ignore-timeout=1
+max-visible=3
+```
+
+<CardGroup cols={2}>
+  <Card title="Catppuccin Theme" icon="palette">
+    Matches the desktop color scheme
+  </Card>
+  
+  <Card title="5 Second Timeout" icon="clock">
+    Notifications auto-dismiss after 5s
+  </Card>
+  
+  <Card title="3 Max Visible" icon="layer-group">
+    Shows up to 3 notifications at once
+  </Card>
+  
+  <Card title="Rounded Corners" icon="circle">
+    10px border radius for modern look
+  </Card>
+</CardGroup>
+
+## Notification Styling
+
+### Color Scheme
+
+Mako uses Catppuccin Mocha colors for consistency:
+
+<AccordionGroup>
+  <Accordion title="Color Breakdown">
+    | Property | Color | Hex | Description |
+    |----------|-------|-----|-------------|
+    | Background | Mantle | `#1e1e2e` | Dark background |
+    | Text | Text | `#cdd6f4` | Light text color |
+    | Border | Lavender | `#b4befe` | Soft purple border |
+  </Accordion>
+</AccordionGroup>
+
+### Border and Shape
+
+```conf
+border-size=2
+border-radius=10
+```
+
+- **Border Size**: 2px solid border for definition
+- **Border Radius**: 10px rounded corners matching Hyprland windows
+
+<Note>
+  The border radius matches other UI elements (Hyprland: 9px, Mako: 10px) for visual consistency.
+</Note>
+
+## Timeout Behavior
+
+```conf
+default-timeout=5000
+ignore-timeout=1
+```
+
+<AccordionGroup>
+  <Accordion title="Timeout Settings">
+    | Setting | Value | Description |
+    |---------|-------|-------------|
+    | `default-timeout` | 5000ms | Normal notifications dismiss after 5 seconds |
+    | `ignore-timeout` | 1 | Respects application-specified timeouts |
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Click a notification to dismiss it immediately, or wait for the automatic timeout.
+</Tip>
+
+## Urgency Levels
+
+Mako supports different styles based on notification urgency:
+
+### Critical Notifications
+
+```conf
+[urgency=critical]
+border-color=#f38ba8
+default-timeout=0
+background-color=#313244
+```
+
+<CardGroup cols={3}>
+  <Card title="Red Border" icon="exclamation-triangle">
+    `#f38ba8` - Catppuccin Red
+  </Card>
+  
+  <Card title="No Timeout" icon="infinity">
+    Stays until manually dismissed
+  </Card>
+  
+  <Card title="Darker Background" icon="moon">
+    `#313244` for emphasis
+  </Card>
+</CardGroup>
+
+Critical notifications:
+- Require manual dismissal (timeout=0)
+- Have red borders for urgency
+- Use a darker background to stand out
+- Typical use: System errors, battery warnings
+
+### Category-Based Styling
+
+```conf
+[category=system]
+border-color=#fab387
+```
+
+System notifications use peach/orange border (`#fab387`) to distinguish them from regular notifications.
+
+## Maximum Visible Notifications
+
+```conf
+max-visible=3
+```
+
+Limits the number of simultaneous notifications to 3, preventing screen clutter. Additional notifications queue and appear as older ones dismiss.
+
+<Note>
+  If more than 3 notifications arrive, they stack in a queue and appear one by one as space becomes available.
+</Note>
+
+## Position and Layout
+
+While not explicitly set in this config, Mako defaults are:
+
+- **Position**: Top-right corner
+- **Width**: Auto-sized based on content
+- **Padding**: Internal padding for readability
+- **Margin**: Space between notifications
+
+Customize position by adding:
+
+```conf
+anchor=top-right
+margin=10
+padding=15
+width=350
+```
+
+Available anchors:
+- `top-left`, `top-center`, `top-right`
+- `bottom-left`, `bottom-center`, `bottom-right`
+
+## Usage
+
+### Manual Testing
+
+Send a test notification:
+
+```bash
+notify-send "Test Notification" "This is a test message"
+```
+
+With urgency level:
+
+```bash
+notify-send -u critical "Critical" "Important message!"
+notify-send -u normal "Normal" "Regular notification"
+notify-send -u low "Low" "Minor update"
+```
+
+With category:
+
+```bash
+notify-send -c system "System Update" "Updates available"
+```
+
+### Common Notification Sources
+
+<AccordionGroup>
+  <Accordion title="System Notifications">
+    - Battery warnings
+    - Volume changes
+    - Brightness adjustments
+    - System updates
+    - Drive mount/unmount
+  </Accordion>
+
+  <Accordion title="Application Notifications">
+    - Chat messages
+    - Email alerts
+    - Calendar reminders
+    - Download completions
+    - Build status
+  </Accordion>
+</AccordionGroup>
+
+## Interactivity
+
+<CardGroup cols={2}>
+  <Card title="Left Click" icon="hand-pointer">
+    Dismiss notification
+  </Card>
+  
+  <Card title="Right Click" icon="hand-pointer">
+    Context menu (if available)
+  </Card>
+  
+  <Card title="Middle Click" icon="hand-pointer">
+    Invoke default action
+  </Card>
+  
+  <Card title="Hover" icon="mouse-pointer">
+    Pause auto-dismiss timer
+  </Card>
+</CardGroup>
+
+## Customization Options
+
+### Font Styling
+
+Add font configuration:
+
+```conf
+font=JetBrainsMono Nerd Font 11
+```
+
+### Icon Display
+
+Control icon appearance:
+
+```conf
+icons=1
+max-icon-size=48
+icon-path=/usr/share/icons/Papirus-Dark
+```
+
+### Grouping
+
+Group similar notifications:
+
+```conf
+group-by=app-name
+max-history=10
+```
+
+### Actions
+
+Enable notification actions:
+
+```conf
+actions=1
+```
+
+Some applications provide action buttons (e.g., "Reply", "Dismiss", "Open").
+
+## Advanced Configuration
+
+### Per-Application Settings
+
+```conf
+[app-name="Spotify"]
+border-color=#1db954
+default-timeout=3000
+```
+
+### Multiple Criteria
+
+```conf
+[urgency=critical app-name="Battery"]
+border-color=#f38ba8
+default-timeout=0
+background-color=#313244
+```
+
+### Format Strings
+
+Customize notification text:
+
+```conf
+format=<b>%s</b>\n%b
+max-visible=3
+```
+
+Format variables:
+- `%a` - App name
+- `%s` - Summary
+- `%b` - Body
+- `%i` - Icon name
+
+## Control Commands
+
+<CodeGroup>
+```bash Dismiss All
+makoctl dismiss --all
+```
+
+```bash Invoke Action
+makoctl invoke
+```
+
+```bash Restore Last
+makoctl restore
+```
+
+```bash Reload Config
+makoctl reload
+```
+</CodeGroup>
+
+<Tip>
+  Bind `makoctl dismiss --all` to a keybinding in Hyprland to quickly clear all notifications.
+</Tip>
+
+## Integration with Hyprland
+
+Mako integrates with Hyprland's window rules:
+
+```conf
+# In hyprland windowrules.conf
+windowrule {
+    name = notifications
+    match:class = ^(mako)$
+    pin = on
+    float = on
+}
+```
+
+This ensures notifications:
+- Stay on top (`pin = on`)
+- Float above other windows
+- Don't interfere with tiling layout
+
+## Performance
+
+<CardGroup cols={2}>
+  <Card title="Lightweight" icon="feather">
+    Minimal memory footprint (~5MB)
+  </Card>
+  
+  <Card title="Efficient" icon="bolt">
+    No background polling or timers
+  </Card>
+  
+  <Card title="Wayland Native" icon="display">
+    Built specifically for Wayland
+  </Card>
+  
+  <Card title="Fast Rendering" icon="gauge-high">
+    Hardware-accelerated with layer-shell
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Notifications Not Showing">
+    Check if Mako is running:
+    ```bash
+    pgrep -x mako
+    ```
+    
+    Start Mako if not running:
+    ```bash
+    mako &
+    ```
+    
+    Ensure Mako starts with Hyprland in `autostart.conf`:
+    ```conf
+    exec-once = mako
+    ```
+  </Accordion>
+
+  <Accordion title="Config Not Loading">
+    Verify config file location:
+    ```bash
+    ls -la ~/.config/mako/config
+    ```
+    
+    Reload configuration:
+    ```bash
+    makoctl reload
+    ```
+  </Accordion>
+
+  <Accordion title="Styling Issues">
+    Check for syntax errors in config file. Each line should be:
+    ```conf
+    key=value
+    ```
+    
+    No spaces around `=` sign.
+  </Accordion>
+</AccordionGroup>
+
+## Example Notifications
+
+<CodeGroup>
+```bash Battery Warning
+notify-send -u critical "Battery Low" "15% remaining"
+```
+
+```bash Volume Change
+notify-send -t 2000 "Volume" "70%"
+```
+
+```bash System Update
+notify-send -c system "System" "Updates available"
+```
+
+```bash With Icon
+notify-send -i dialog-information "Info" "Operation complete"
+```
+</CodeGroup>
+
+<Warning>
+  Mako is Wayland-only. It will not work on X11 systems. For X11, use alternatives like dunst or notify-osd.
+</Warning>

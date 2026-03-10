@@ -1,0 +1,320 @@
+---
+title: 'Terminal'
+description: 'Kitty - A GPU-accelerated terminal emulator'
+icon: 'terminal'
+---
+
+## Kitty Terminal Emulator
+
+Kitty is a fast, feature-rich, GPU-accelerated terminal emulator designed for power users. This configuration provides a beautiful, transparent terminal with excellent font rendering and performance.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="GPU Acceleration" icon="microchip">
+    Hardware-accelerated rendering for smooth performance and animations
+  </Card>
+  
+  <Card title="Ligatures" icon="link">
+    Full support for programming ligatures with JetBrains Mono
+  </Card>
+  
+  <Card title="Transparency" icon="eye">
+    50% background opacity with blur for a modern aesthetic
+  </Card>
+  
+  <Card title="Remote Control" icon="satellite-dish">
+    Unix socket support for remote control and scripting
+  </Card>
+</CardGroup>
+
+## Font Configuration
+
+Kitty uses JetBrains Mono Nerd Font with enhanced ligatures:
+
+```conf
+font_family      JetBrainsMono Nerd Font Mono
+bold_font        JetBrainsMono Nerd Font Mono Bold
+italic_font      JetBrainsMono Nerd Font Mono Italic
+bold_italic_font JetBrainsMono Nerd Font Mono Bold Italic
+font_size        13.0
+
+# Ligature enhancement
+disable_ligatures never
+font_features JetBrainsMonoNFM-Regular +zero +ss01 +cv14
+```
+
+### Font Features
+
+- `+zero`: Slashed zero for clarity
+- `+ss01`: Stylistic set 1
+- `+cv14`: Character variant 14
+
+## Theme Configuration
+
+Catppuccin Macchiato theme provides a soothing pastel aesthetic:
+
+<CodeGroup>
+```conf Colors
+# Basic colors
+foreground              #CAD3F5
+background              #24273A
+selection_foreground    #24273A
+selection_background    #F4DBD6
+
+# Cursor
+cursor                  #F4DBD6
+cursor_text_color       #24273A
+```
+
+```conf Tab Bar
+# Tab bar colors
+active_tab_foreground   #181926
+active_tab_background   #C6A0F6
+inactive_tab_foreground #CAD3F5
+inactive_tab_background #1E2030
+tab_bar_background      #181926
+```
+
+```conf Borders
+# Window borders
+active_border_color     #B7BDF8
+inactive_border_color   #6E738D
+bell_border_color       #EED49F
+```
+</CodeGroup>
+
+### Terminal Colors
+
+The Catppuccin palette includes 16 ANSI colors:
+
+| Color   | Normal | Bright |
+|---------|--------|--------|
+| Black   | #494D64 | #5B6078 |
+| Red     | #ED8796 | #ED8796 |
+| Green   | #A6DA95 | #A6DA95 |
+| Yellow  | #EED49F | #EED49F |
+| Blue    | #8AADF4 | #8AADF4 |
+| Magenta | #F5BDE6 | #F5BDE6 |
+| Cyan    | #8BD5CA | #8BD5CA |
+| White   | #B8C0E0 | #A5ADCB |
+
+## Window Appearance
+
+```conf
+# Transparency and blur
+background_opacity    0.50
+background_blur       1
+dynamic_background_opacity yes
+
+# Window dimensions
+initial_window_width  640
+initial_window_height 480
+remember_window_size  no
+
+# Padding
+window_padding_width  12
+window_padding_height 4
+window_margin_height  5
+
+# Borders
+window_border_width   0
+draw_minimal_borders  yes
+```
+
+<Tip>
+  Use `Ctrl + Shift + F11` to toggle fullscreen mode, or adjust opacity on the fly with dynamic background opacity enabled.
+</Tip>
+
+## Tab Bar
+
+Powerful tab management with visual indicators:
+
+```conf
+tab_bar_edge            top
+tab_bar_style           fade
+tab_powerline_style     slanted
+tab_title_template      "{fmt.fg.red}{activity_symbol}{fmt.fg.tab}{index}:{title}"
+tab_separator           " ┇"
+
+# Appearance
+tab_bar_min_tabs        2
+tab_bar_margin_width    9.0
+tab_bar_margin_height   9.0 0.0
+tab_fade                0.5 0.75 1
+
+# Fonts
+active_tab_font_style   bold
+inactive_tab_font_style normal
+```
+
+## Cursor Settings
+
+```conf
+cursor_shape               beam
+cursor_beam_thickness      2.0
+cursor_blink_interval      0.5
+cursor_stop_blinking_after 15.0
+```
+
+The cursor uses a beam shape (vertical bar) with 2.0px thickness, ideal for programming.
+
+## Scrollback
+
+Extensive scrollback buffer for long command outputs:
+
+```conf
+scrollback_lines 50000
+scrollback_pager_history_size 100
+scrollback_pager less --chop-long-lines --RAW-CONTROL-CHARS +INPUT_LINE_NUMBER
+scrollback_fill_enlarged_window yes
+```
+
+<CardGroup cols={2}>
+  <Card title="50,000 Lines" icon="scroll">
+    Massive scrollback buffer for reviewing long outputs
+  </Card>
+  
+  <Card title="Less Integration" icon="book-open">
+    Uses `less` as the pager for comfortable reading
+  </Card>
+</CardGroup>
+
+## Keybindings
+
+Minimal but effective keybindings:
+
+```conf
+# Copy/Paste
+map ctrl+shift+c copy_to_clipboard
+map ctrl+shift+v paste_from_clipboard
+map ctrl+shift+s paste_from_selection
+
+# Reload config
+map ctrl+shift+f5 load_config_file
+```
+
+<AccordionGroup>
+  <Accordion title="Clipboard Operations">
+    | Key | Action |
+    |-----|--------|
+    | `Ctrl + Shift + C` | Copy to clipboard |
+    | `Ctrl + Shift + V` | Paste from clipboard |
+    | `Ctrl + Shift + S` | Paste from selection |
+  </Accordion>
+
+  <Accordion title="Configuration">
+    | Key | Action |
+    |-----|--------|
+    | `Ctrl + Shift + F5` | Reload configuration |
+  </Accordion>
+</AccordionGroup>
+
+## Mouse Features
+
+```conf
+# URL handling
+detect_urls yes
+url_color #61afef
+url_style curly
+open_url_with default
+
+# Mouse behavior
+mouse_hide_wait 2.0
+focus_follows_mouse no
+
+# Click handling
+mouse_map left click ungrabbed mouse_handle_click selection link prompt
+mouse_map ctrl+left click ungrabbed mouse_handle_click link
+```
+
+<Note>
+  URLs are automatically detected and styled with curly underlines. Click with Ctrl to open links in your default browser.
+</Note>
+
+## Performance Optimization
+
+```conf
+# Rendering
+repaint_delay   5
+input_delay     1
+sync_to_monitor yes
+
+# No swap/backup files
+swapfile no
+backup no
+writebackup no
+```
+
+### Layout Support
+
+Multiple window layouts are enabled:
+
+```conf
+enabled_layouts splits,stack,tall,fat,grid,horizontal,vertical
+```
+
+## Shell Integration
+
+Configured for Zsh with remote control:
+
+```conf
+shell zsh
+allow_remote_control yes
+listen_on unix:/tmp/kitty
+```
+
+The Unix socket at `/tmp/kitty` allows external scripts to control Kitty programmatically.
+
+## Selection and Copy
+
+```conf
+copy_on_select clipboard
+strip_trailing_spaces smart
+click_interval 0.5
+select_by_word_characters @-./_~?&=%+#
+```
+
+<Tip>
+  Text is automatically copied to clipboard when selected. Smart trailing space stripping prevents unwanted whitespace.
+</Tip>
+
+## Advanced Features
+
+<AccordionGroup>
+  <Accordion title="Hyperlink Support">
+    ```conf
+    allow_hyperlinks yes
+    ```
+    Enables support for terminal hyperlinks (OSC 8).
+  </Accordion>
+
+  <Accordion title="Bell Settings">
+    ```conf
+    enable_audio_bell no
+    visual_bell_duration 0.0
+    window_alert_on_bell no
+    ```
+    Audio and visual bells are disabled for a distraction-free experience.
+  </Accordion>
+
+  <Accordion title="Box Drawing">
+    ```conf
+    box_drawing_scale 0.001, 1, 1.5, 2
+    ```
+    Enhanced rendering for box drawing characters and borders.
+  </Accordion>
+</AccordionGroup>
+
+## GPU Acceleration
+
+Kitty leverages your GPU for rendering, providing:
+
+- Smooth scrolling even with large buffers
+- Fast redraw times
+- Efficient resource usage
+- Support for high refresh rate displays
+
+<Warning>
+  Ensure your GPU drivers are up to date for optimal performance. Kitty works best with modern OpenGL support.
+</Warning>

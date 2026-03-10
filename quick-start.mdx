@@ -1,0 +1,322 @@
+---
+title: Quick Start
+description: Get productive with Hyprland in minutes - essential keybindings and workflows
+---
+
+## First Login
+
+After logging into Hyprland for the first time, you'll see:
+
+- **Waybar** at the top showing workspaces, system tray, and status information
+- A clean desktop with your wallpaper
+- No windows open initially
+
+The modifier key for most shortcuts is `Super` (Windows key). Let's get you productive!
+
+## Essential Keybindings
+
+### Applications
+
+<CardGroup cols={2}>
+  <Card title="Terminal" icon="terminal">
+    `Super + Return`
+    
+    Opens Kitty terminal emulator
+  </Card>
+  
+  <Card title="Application Launcher" icon="grid">
+    `Super + Space`
+    
+    Opens Rofi launcher to search and launch applications
+  </Card>
+  
+  <Card title="File Manager" icon="folder">
+    `Super + E`
+    
+    Opens Nemo file manager
+  </Card>
+  
+  <Card title="Browser" icon="browser">
+    Launch Brave browser via `Super + Space` → type "brave"
+  </Card>
+</CardGroup>
+
+### Window Management
+
+<Tip>
+  Hyprland uses a dynamic tiling layout by default. Windows automatically tile to make efficient use of screen space.
+</Tip>
+
+#### Basic Window Operations
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Q` | Close active window |
+| `Super + V` | Toggle floating mode for current window |
+| `Super + F11` | Toggle fullscreen |
+| `Super + F` | Swap window with master |
+| `Super + Shift + F` | Focus master window |
+
+#### Focus Movement (Vim-style)
+
+Move focus between windows using Vim keybindings:
+
+<CodeGroup>
+```text Left
+Super + H
+```
+
+```text Down  
+Super + J
+```
+
+```text Up
+Super + K
+```
+
+```text Right
+Super + L
+```
+</CodeGroup>
+
+#### Window Movement
+
+Move windows around your layout:
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super + Shift + H` | Move window left |
+| `Super + Shift + J` | Move window down |
+| `Super + Shift + K` | Move window up |
+| `Super + Shift + L` | Move window right |
+
+#### Resize Windows
+
+Resize the active window using `Ctrl` key:
+
+| Keybinding | Action |
+|------------|--------|
+| `Ctrl + H` | Shrink width (left) |
+| `Ctrl + L` | Expand width (right) |
+| `Ctrl + K` | Shrink height (up) |
+| `Ctrl + J` | Expand height (down) |
+
+#### Mouse Controls
+
+<CardGroup cols={2}>
+  <Card title="Move Window" icon="arrows-up-down-left-right">
+    `Super + Left Click + Drag`
+  </Card>
+  
+  <Card title="Resize Window" icon="expand">
+    `Super + Right Click + Drag`
+  </Card>
+  
+  <Card title="Scroll Workspaces" icon="mouse">
+    `Super + Mouse Wheel Up/Down`
+  </Card>
+</CardGroup>
+
+### Workspaces
+
+Hyprland provides 10 workspaces for organizing your windows:
+
+#### Switch Workspace
+
+```text
+Super + [1-9,0]  # Switch to workspace 1-10
+```
+
+Example: `Super + 3` switches to workspace 3
+
+#### Move Window to Workspace
+
+```text
+Super + Shift + [1-9,0]  # Move active window to workspace 1-10
+```
+
+Example: `Super + Shift + 5` moves current window to workspace 5
+
+#### Special Workspace (Scratchpad)
+
+A hidden workspace for quick access to a dropdown terminal:
+
+<CodeGroup>
+```text Toggle Scratchpad
+Super + Tab
+```
+
+```text Move to Scratchpad
+Super + Shift + Tab
+```
+</CodeGroup>
+
+<Note>
+  The scratchpad automatically launches with a Kitty terminal on startup. Use it as a quick dropdown terminal!
+</Note>
+
+### Screenshots
+
+<CardGroup cols={3}>
+  <Card title="Full Screen" icon="desktop">
+    `Print`
+    
+    Capture entire screen with Satty editor
+  </Card>
+  
+  <Card title="Region to Clipboard" icon="copy">
+    `Super + Print`
+    
+    Select region and copy to clipboard
+  </Card>
+  
+  <Card title="Region with Editor" icon="crop">
+    `Super + F12`
+    
+    Select region and open in Satty for annotation
+  </Card>
+</CardGroup>
+
+Screenshots are saved to `~/Pictures/Screenshots/` with timestamp format `YYYYMMDD-HHMMSS.png`
+
+### System Controls
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Shift + R` | Reload Hyprland configuration |
+| `Super + M` | Open logout menu (wlogout) |
+| `Super + Shift + Q` | Lock screen (hyprlock) |
+
+### Media Keys
+
+| Keybinding | Action |
+|------------|--------|
+| `XF86AudioRaiseVolume` | Increase volume by 5% |
+| `XF86AudioLowerVolume` | Decrease volume by 5% |
+| `XF86AudioMute` | Toggle mute |
+
+<Tip>
+  Most modern keyboards have dedicated media keys that work out of the box!
+</Tip>
+
+## Your First Workflow
+
+Let's set up a typical development workspace:
+
+<Steps>
+  <Step title="Open Terminal">
+    Press `Super + Return` to open your terminal on workspace 1.
+  </Step>
+
+  <Step title="Open Editor">
+    Press `Super + Space`, type "code" or "nvim", and press Enter to open your code editor.
+  </Step>
+
+  <Step title="Switch to Workspace 2">
+    Press `Super + 2` to switch to workspace 2.
+  </Step>
+
+  <Step title="Open Browser">
+    Press `Super + Space`, type "brave", and press Enter.
+  </Step>
+
+  <Step title="Navigate Between Workspaces">
+    Use `Super + 1` and `Super + 2` to switch between your code and browser.
+  </Step>
+
+  <Step title="Use Scratchpad">
+    Press `Super + Tab` to toggle the dropdown terminal for quick commands.
+  </Step>
+</Steps>
+
+## Quick Tips
+
+<AccordionGroup>
+  <Accordion title="Customize Keybindings">
+    Keybindings are defined in:
+    ```bash
+    ~/.config/hypr/modules/binds.conf
+    ```
+    
+    Edit this file and reload with `Super + Shift + R` to apply changes.
+  </Accordion>
+
+  <Accordion title="Change Default Applications">
+    Default applications are set in:
+    ```bash
+    ~/.config/hypr/modules/vars.conf
+    ```
+    
+    Example:
+    ```conf
+    $terminal = kitty
+    $fileManager = nemo
+    $menu = rofi -show drun
+    $lock = hyprlock
+    $browser = brave
+    ```
+  </Accordion>
+
+  <Accordion title="Monitor Configuration">
+    Configure monitors in:
+    ```bash
+    ~/.config/hypr/modules/monitors.conf
+    ```
+    
+    See [Hyprland Configuration](/configuration/hyprland) for details.
+  </Accordion>
+
+  <Accordion title="Install More Applications">
+    Use `paru` to install additional packages:
+    ```bash
+    paru -S package-name
+    ```
+    
+    Or add them to `~/dotfiles/packages.txt` and run `./install` again.
+  </Accordion>
+</AccordionGroup>
+
+## Cheat Sheet
+
+Here's a printable reference of the most important keybindings:
+
+<CardGroup cols={2}>
+  <Card title="Applications">
+    - `Super + Return` → Terminal
+    - `Super + Space` → App Launcher
+    - `Super + E` → File Manager
+  </Card>
+
+  <Card title="Window Control">
+    - `Super + Q` → Close window
+    - `Super + V` → Toggle floating
+    - `Super + H/J/K/L` → Focus
+    - `Super + Shift + H/J/K/L` → Move
+  </Card>
+
+  <Card title="Workspaces">
+    - `Super + [1-9,0]` → Switch workspace
+    - `Super + Shift + [1-9,0]` → Move window
+    - `Super + Tab` → Scratchpad
+  </Card>
+
+  <Card title="System">
+    - `Super + Shift + R` → Reload config
+    - `Super + M` → Logout menu
+    - `Super + Shift + Q` → Lock screen
+    - `Print` → Screenshot
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+Now that you know the basics, explore:
+
+- [Configuration Guide](/configuration/overview) - Customize colors, layouts, and behavior
+- [Status Bar Component](/components/status-bar) - Personalize your Waybar
+- [Keybindings Reference](/guides/keybindings) - Full list of all keybindings
+- [Troubleshooting](/guides/troubleshooting) - Common issues and solutions
+
+<Tip>
+  Press `Super + Shift + R` anytime to reload your configuration after making changes!
+</Tip>

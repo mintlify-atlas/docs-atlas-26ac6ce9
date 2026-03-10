@@ -1,0 +1,478 @@
+---
+title: Theming Guide
+description: Learn how theming works across all applications in your Hyprland setup
+---
+
+This guide explains how the theming system works and how to customize or create your own color schemes.
+
+## Theme Overview
+
+The dotfiles use the **Catppuccin** color palette with coordinated theming across:
+
+- Hyprland (window manager)
+- Waybar (status bar)
+- Kitty (terminal)
+- Rofi (application launcher)
+- Other applications
+
+## Color Scheme Architecture
+
+### Hyprland Color Variables
+
+Colors are defined in `~/.config/hypr/modules/vars.conf`:
+
+```conf
+# Accent Colors
+$mauve = rgba(c6a0f6ff)    # Purple accent
+$blue = rgba(8aadf4ff)     # Blue accent
+$red = rgba(ed8796ff)      # Red/error color
+$green = rgba(a6da95ff)    # Green/success color
+$peach = rgba(f5a97fff)    # Orange accent
+
+# Background Layers
+$mantle = rgba(1a1a1aee)   # Darkest background
+$base = rgba(24273aff)     # Base background
+$surface0 = rgba(49495aff) # Elevated surface
+$surface1 = rgba(565a7aff) # Higher surface
+$surface2 = rgba(6d7899ff) # Highest surface
+
+# Text Colors
+$text = rgba(cad1d9ff)     # Primary text
+$subtext0 = rgba(a5adcbff) # Secondary text
+$subtext1 = rgba(b8c5d6ff) # Tertiary text
+```
+
+### Color Format
+
+Hyprland uses RGBA format: `rgba(RRGGBBaa)`
+- `RR` - Red (hex)
+- `GG` - Green (hex)
+- `BB` - Blue (hex)
+- `aa` - Alpha/opacity (hex, `ff` = opaque)
+
+## Hyprland Window Theming
+
+Window appearance is configured in `~/.config/hypr/modules/theme.conf`.
+
+### Border Colors
+
+```conf
+group {
+    col.border_active = $blue      # Active window border
+    col.border_inactive = $surface1 # Inactive window border
+}
+```
+
+### Opacity and Transparency
+
+```conf
+decoration {
+    active_opacity = 1.0           # Focused windows: opaque
+    inactive_opacity = 0.85        # Unfocused windows: slightly transparent
+    
+    dim_inactive = true            # Dim unfocused windows
+    dim_strength = 0.2             # Dimming amount (0.0-1.0)
+}
+```
+
+<Tip>
+  Adjust `inactive_opacity` between 0.7-0.95 to find your preferred transparency level.
+</Tip>
+
+### Window Decorations
+
+```conf
+decoration {
+    rounding = 9                   # Corner radius in pixels
+    
+    blur {
+        enabled = true
+        size = 8                   # Blur radius
+        passes = 1                 # Quality (higher = better/slower)
+        new_optimizations = true
+        special = true             # Blur special workspaces
+    }
+    
+    shadow {
+        enabled = true
+        range = 6                  # Shadow size
+        render_power = 2           # Shadow intensity
+        color = rgba(1a1a1aee)    # Shadow color
+    }
+}
+```
+
+### Animations
+
+```conf
+animations {
+    enabled = yes
+    
+    # Bezier curves for smooth motion
+    bezier = myBezier, 0.05, 0.9, 0.1, 1.05
+    bezier = easeInOutQuad, 0.45, 0, 0.55, 1
+    
+    # Window animations
+    animation = windows, 1, 7, myBezier
+    animation = windowsIn, 1, 7, myBezier
+    animation = windowsOut, 1, 7, default, popin 80%
+    animation = windowsMove, 1, 5, myBezier
+    
+    # Fade animations
+    animation = fade, 1, 7, default
+    animation = fadeIn, 1, 5, default
+    animation = fadeOut, 1, 5, default
+    
+    # Workspace transitions
+    animation = workspaces, 1, 6, easeInOutQuad
+    animation = border, 1, 10, default
+}
+```
+
+Animation syntax: `animation = NAME, ENABLE, SPEED, CURVE, [STYLE]`
+
+## Kitty Terminal Theme
+
+Kitty uses the **Catppuccin Macchiato** theme in `~/.config/kitty/theme.conf`:
+
+```conf
+# Base colors
+foreground              #CAD3F5
+background              #24273A
+selection_foreground    #24273A
+selection_background    #F4DBD6
+
+# Cursor
+cursor                  #F4DBD6
+cursor_text_color       #24273A
+
+# Tab bar
+active_tab_foreground   #181926
+active_tab_background   #C6A0F6
+inactive_tab_foreground #CAD3F5
+inactive_tab_background #1E2030
+```
+
+### Changing Kitty Theme
+
+**Option 1: Browse Kitty Themes**
+
+1. Visit [Kitty Themes](https://github.com/kovidgoyal/kitty-themes)
+2. Download your preferred theme
+3. Replace `~/.config/kitty/theme.conf`
+4. Reload: `kitty @ set-colors ~/.config/kitty/theme.conf`
+
+**Option 2: Use Kitty Themes Tool**
+
+```bash
+# Clone themes repository
+git clone --depth 1 https://github.com/dexpota/kitty-themes.git ~/.config/kitty/themes
+
+# Update kitty.conf to include a theme
+include ~/.config/kitty/themes/Dracula.conf
+```
+
+**Option 3: Generate from Terminal Colors**
+
+```bash
+# Install theme converter
+pip install pywal
+
+# Generate from wallpaper
+wal -i ~/Pictures/wallpaper.jpg
+
+# Apply to Kitty
+cat ~/.cache/wal/colors-kitty.conf > ~/.config/kitty/theme.conf
+```
+
+## Waybar Theming
+
+Waybar uses CSS styling in `~/.config/waybar/style.css`:
+
+### Color Variables
+
+```css
+@define-color bg #1e1e2e;           /* Background */
+@define-color bg_alt #313244;       /* Alternate background */
+@define-color surface0 #45475a;     /* Surface color */
+@define-color mauve #cba6f7;        /* Purple accent */
+@define-color blue #89b4fa;         /* Blue accent */
+@define-color red #f38ba8;          /* Red accent */
+@define-color green #a6e3a1;        /* Green accent */
+@define-color yellow #f9e2af;       /* Yellow accent */
+@define-color text #cdd6f4;         /* Text color */
+@define-color subtext0 #a6adc8;     /* Muted text */
+```
+
+### Module Styling
+
+```css
+/* Workspace indicator */
+#workspaces button.focused {
+    color: @mauve;
+    font-weight: 700;
+}
+
+/* Audio module */
+#pulseaudio {
+    color: @yellow;
+}
+
+#pulseaudio.muted {
+    color: @subtext0;
+}
+
+/* Network status */
+#network {
+    color: @green;
+}
+
+#network.disconnected {
+    color: @red;
+}
+```
+
+<Accordion title="Customize Waybar module colors">
+  To change module colors, edit the corresponding selectors in `style.css`:
+  
+  ```css
+  #cpu {
+      color: @blue;  /* Change to any color variable */
+  }
+  
+  #memory {
+      color: @green;
+  }
+  
+  #clock {
+      color: @mauve;
+      font-weight: 700;
+  }
+  ```
+</Accordion>
+
+### Font Customization
+
+```css
+* {
+  font-family: "JetBrainsMono Nerd Font", "Roboto", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+```
+
+## Rofi Application Launcher
+
+Rofi theming is configured in `~/.config/rofi/config.rasi`:
+
+```rasi
+/* Color variables */
+* {
+    b-color:        #000000FF;  /* Border */
+    fg-color:       #FFFFFFFF;  /* Foreground */
+    fgp-color:      #888888FF;  /* Placeholder */
+    hl-color:       #FFFFFFFF;  /* Highlight */
+    hlt-color:      #000000FF;  /* Highlight text */
+    alt-color:      #111111FF;  /* Alternate row */
+    wbg-color:      #000000CC;  /* Window background */
+    w-border-color: #FFFFFFFF;  /* Window border */
+}
+
+/* Window dimensions */
+window {
+    width:            450px;
+    border-radius:    8px;
+    background-color: @wbg-color;
+    border:           2px solid;
+    border-color:     @w-border-color;
+    padding:          12px;
+}
+```
+
+### Creating a Rofi Theme
+
+1. **Browse existing themes:**
+   ```bash
+   rofi-theme-selector
+   ```
+
+2. **Preview themes:**
+   ```bash
+   rofi -show drun -theme ~/.config/rofi/config.rasi
+   ```
+
+3. **Customize colors** in `config.rasi` to match your scheme
+
+## Creating a Cohesive Color Scheme
+
+### Step 1: Choose Base Colors
+
+Pick your color palette (use tools like [Coolors](https://coolors.co/) or [Adobe Color](https://color.adobe.com/)):
+
+- Background: Dark base color
+- Foreground: Light text color
+- Accent 1-3: Complementary colors for highlights
+- Surface colors: Progressively lighter shades of background
+
+### Step 2: Update Hyprland Variables
+
+Edit `~/.config/hypr/modules/vars.conf`:
+
+```conf
+# Your custom colors
+$accent1 = rgba(YOUR_COLORff)
+$accent2 = rgba(YOUR_COLORff)
+$accent3 = rgba(YOUR_COLORff)
+
+$bg_dark = rgba(YOUR_COLORff)
+$bg_normal = rgba(YOUR_COLORff)
+$bg_light = rgba(YOUR_COLORff)
+
+$text = rgba(YOUR_COLORff)
+$text_muted = rgba(YOUR_COLORff)
+```
+
+### Step 3: Apply to Waybar
+
+Update CSS variables in `~/.config/waybar/style.css`:
+
+```css
+@define-color bg #YOUR_COLOR;
+@define-color accent1 #YOUR_COLOR;
+/* ... match your Hyprland palette */
+```
+
+### Step 4: Generate Kitty Theme
+
+Create matching colors in `~/.config/kitty/theme.conf` using the same hex values.
+
+### Step 5: Reload Everything
+
+```bash
+# Reload Hyprland
+hyprctl reload
+
+# Restart Waybar
+killall waybar && waybar &
+
+# Reload Kitty
+kitty @ set-colors --all ~/.config/kitty/theme.conf
+```
+
+## Popular Color Schemes
+
+<Accordion title="Catppuccin Mocha (Darker)">
+  ```conf
+  # Hyprland vars.conf
+  $mauve = rgba(cba6f7ff)
+  $blue = rgba(89b4faff)
+  $red = rgba(f38ba8ff)
+  $green = rgba(a6e3a1ff)
+  $base = rgba(1e1e2eff)
+  $text = rgba(cdd6f4ff)
+  ```
+</Accordion>
+
+<Accordion title="Nord">
+  ```conf
+  # Hyprland vars.conf
+  $blue = rgba(88c0d0ff)
+  $cyan = rgba(8fbcbbff)
+  $green = rgba(a3be8cff)
+  $red = rgba(bf616aff)
+  $base = rgba(2e3440ff)
+  $text = rgba(eceff4ff)
+  ```
+</Accordion>
+
+<Accordion title="Dracula">
+  ```conf
+  # Hyprland vars.conf
+  $purple = rgba(bd93f9ff)
+  $pink = rgba(ff79c6ff)
+  $cyan = rgba(8be9fdff)
+  $green = rgba(50fa7bff)
+  $base = rgba(282a36ff)
+  $text = rgba(f8f8f2ff)
+  ```
+</Accordion>
+
+<Accordion title="Gruvbox Dark">
+  ```conf
+  # Hyprland vars.conf
+  $orange = rgba(fe8019ff)
+  $yellow = rgba(fabd2fff)
+  $green = rgba(b8bb26ff)
+  $blue = rgba(83a598ff)
+  $base = rgba(282828ff)
+  $text = rgba(ebdbb2ff)
+  ```
+</Accordion>
+
+## Theme Coordination Tips
+
+<Tip>
+  **Use a color palette generator**: Tools like [terminal.sexy](https://terminal.sexy/) can generate coordinated themes for multiple applications.
+</Tip>
+
+<Tip>
+  **Test contrast ratios**: Ensure text is readable against backgrounds using [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/).
+</Tip>
+
+<Tip>
+  **Maintain semantic meaning**: Use consistent colors for states (green=success, red=error, blue=info) across all applications.
+</Tip>
+
+## Advanced Theming
+
+### Per-Application Window Rules
+
+Apply different opacities to specific applications in `~/.config/hypr/modules/windowrules.conf`:
+
+```conf
+# Make terminal more opaque
+windowrulev2 = opacity 0.95 0.85, class:^(kitty)$
+
+# Fully opaque for video/images
+windowrulev2 = opacity 1.0 1.0, class:^(mpv)$
+windowrulev2 = opacity 1.0 1.0, class:^(imv)$
+```
+
+### Dynamic Theming
+
+For wallpaper-based theming, use [pywal](https://github.com/dylanaraps/pywal):
+
+```bash
+paru -S python-pywal
+
+# Generate colors from wallpaper
+wal -i ~/Pictures/wallpaper.jpg
+
+# Colors saved to ~/.cache/wal/colors
+```
+
+Create a script to apply generated colors to your configs.
+
+## Troubleshooting
+
+<Warning>
+  If colors don't update after changes, ensure you've reloaded the configuration with `Super + Shift + R`.
+</Warning>
+
+### Colors Look Washed Out
+
+Check your monitor color settings and ensure you're using RGBA format correctly in Hyprland configs.
+
+### Waybar Colors Wrong
+
+Verify CSS color variables are defined before being used. CSS processes top-to-bottom.
+
+### Kitty Theme Not Loading
+
+Ensure `include theme.conf` is present in `~/.config/kitty/kitty.conf`.
+
+## See Also
+
+- [Customization Guide](/guides/customization) - General customization tips
+- [Catppuccin](https://catppuccin.com/) - Official Catppuccin theme site
+- [Hyprland Wiki](https://wiki.hyprland.org/) - Official theming documentation

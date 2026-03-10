@@ -1,0 +1,203 @@
+---
+title: Configuration Overview
+description: Understanding the modular configuration structure of these Hyprland dotfiles
+---
+
+## Modular Architecture
+
+This dotfiles repository uses a clean, modular structure that separates configurations by function and type. Everything is organized under three main directories:
+
+```
+dotfiles/
+├── dots/          # Application-specific configurations
+├── hyprland/      # Hyprland window manager and UI components
+└── system/        # System-level configurations
+```
+
+## Configuration Organization
+
+### Application Configs (`dots/`)
+
+User-level application configurations that are portable across different setups:
+
+- **nvim/** - Neovim editor configuration with Lazy.nvim
+- **kitty/** - Terminal emulator settings
+- **code/** - VS Code settings and preferences
+- **fastfetch/** - System information tool
+- **bat/** - Cat replacement with syntax highlighting
+
+### Hyprland Ecosystem (`hyprland/`)
+
+Window manager and Wayland compositor components:
+
+- **hypr/** - Main Hyprland configuration (modular)
+- **waybar/** - Status bar configuration
+- **rofi/** - Application launcher
+- **mako/** - Notification daemon
+- **wlogout/** - Logout menu
+
+### System Configuration (`system/`)
+
+System-wide settings and shell environment:
+
+- **zsh/** - Zsh shell configuration
+- **environment.d/** - Environment variables
+- **paru/** - AUR helper configuration
+
+## Dotbot Symlink Management
+
+The repository uses [Dotbot](https://github.com/anishathalye/dotbot) to automate installation and maintain symbolic links between the repository and your home directory.
+
+### How It Works
+
+<Steps>
+  <Step title="Installation">
+    Running `./install` executes Dotbot with the configuration defined in `install.conf.yaml`
+  </Step>
+  
+  <Step title="Symlink Creation">
+    Dotbot creates symbolic links from your home directory to files in this repository
+  </Step>
+  
+  <Step title="Live Updates">
+    Changes to repository files are immediately reflected in your system since they're symlinked
+  </Step>
+</Steps>
+
+### Symlink Mappings
+
+Here's how the repository structure maps to your home directory:
+
+```yaml install.conf.yaml
+# Home directory files
+~/.zshenv → home/zshenv
+
+# Application configurations
+~/.config/nvim → dots/nvim
+~/.config/kitty → dots/kitty
+~/.config/Code/User/settings.json → dots/code/settings.json
+~/.config/fastfetch → dots/fastfetch
+
+# Hyprland components
+~/.config/hypr → hyprland/hypr
+~/.config/waybar → hyprland/waybar
+~/.config/mako → hyprland/mako
+~/.config/rofi → hyprland/rofi
+~/.config/wlogout → hyprland/wlogout
+
+# System configurations
+~/.config/zsh → system/zsh
+~/.config/environment.d → system/environment.d
+~/.config/paru → system/paru
+```
+
+### Dotbot Configuration Options
+
+```yaml install.conf.yaml
+- defaults:
+    link:
+      relink: true      # Remove existing files and relink
+      create: true      # Create parent directories
+      relative: true    # Use relative paths
+      force: false      # Don't overwrite non-symlinks
+```
+
+## Package Management
+
+The repository includes a `packages.txt` file listing all required packages. Dotbot automatically installs missing packages using paru:
+
+```bash
+# Automated during installation
+comm -23 <(sort packages.txt) <(pacman -Qq | sort)
+paru -S --needed --noconfirm $missing
+```
+
+## Making Changes Safely
+
+<Warning>
+  Always edit files in the repository, not in `~/.config/`. Since files are symlinked, changes in either location affect the repository.
+</Warning>
+
+### Best Practices
+
+<AccordionGroup>
+  <Accordion title="Before Making Changes">
+    1. Navigate to your dotfiles repository (usually `~/dotfiles`)
+    2. Create a new git branch for experimental changes
+    3. Edit files directly in the repository
+    4. Test changes in your live environment
+  </Accordion>
+
+  <Accordion title="Testing Changes">
+    - Hyprland: `Super + Ctrl + R` to reload configuration
+    - Waybar: `pkill waybar && waybar &` to restart
+    - Zsh: `exec zsh` or `source ~/.config/zsh/.zshrc`
+    - Neovim: `:source $MYVIMRC` or restart
+  </Accordion>
+
+  <Accordion title="Committing Changes">
+    ```bash
+    cd ~/dotfiles
+    git add .
+    git commit -m "Update: description of changes"
+    git push
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Directory Structure Details
+
+<CardGroup cols={2}>
+  <Card title="home/" icon="house">
+    Root-level configuration files like `.zshenv` that live directly in `$HOME`
+  </Card>
+
+  <Card title="dots/" icon="gear">
+    Application-specific configs for terminal tools and editors
+  </Card>
+
+  <Card title="hyprland/" icon="window">
+    Complete Hyprland desktop environment configuration
+  </Card>
+
+  <Card title="system/" icon="server">
+    System-wide settings including shell, environment, and package management
+  </Card>
+</CardGroup>
+
+## Configuration Compilation
+
+Some configurations are automatically compiled for performance:
+
+- **Zsh**: `.zsh` files are compiled to `.zwc` (Zsh compiled) format
+- **Completions**: Completion cache is compiled for faster loading
+
+```zsh
+# Automatic compilation in .zshrc
+for conf_file in "$ZDOTDIR"/*.zsh; do
+    local cache_file="$ZSH_CACHE/zwc/${conf_file:t}.zwc"
+    if [[ ! -f "$cache_file" || "$conf_file" -nt "$cache_file" ]]; then
+        zcompile "$cache_file" "$conf_file"
+    fi
+done
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Hyprland Configuration" icon="display" href="/configuration/hyprland">
+    Learn about the modular Hyprland setup
+  </Card>
+
+  <Card title="Shell Configuration" icon="terminal" href="/configuration/shell">
+    Explore Zsh aliases, functions, and plugins
+  </Card>
+
+  <Card title="Application Configs" icon="gear" href="/configuration/applications">
+    Configure Neovim, Kitty, and other apps
+  </Card>
+
+  <Card title="System Settings" icon="server" href="/configuration/system">
+    Manage environment variables and system configs
+  </Card>
+</CardGroup>

@@ -1,0 +1,231 @@
+---
+title: 'Window Manager'
+description: 'Hyprland - A dynamic tiling Wayland compositor'
+icon: 'grid-2'
+---
+
+## What is Hyprland?
+
+Hyprland is a highly customizable dynamic tiling Wayland compositor that is known for its eye candy and extensive customization options. This configuration provides a beautiful and efficient window management experience with smooth animations and intelligent window placement.
+
+## Key Features
+
+### Smooth Animations
+
+Hyprland is configured with custom bezier curves for smooth, visually pleasing animations:
+
+```conf
+bezier = myBezier, 0.05, 0.9, 0.1, 1.05
+bezier = easeInOutQuad, 0.45, 0, 0.55, 1
+
+animation = windows, 1, 7, myBezier
+animation = windowsIn, 1, 7, myBezier
+animation = windowsOut, 1, 7, default, popin 80%
+animation = windowsMove, 1, 5, myBezier
+animation = workspaces, 1, 6, easeInOutQuad
+```
+
+### Visual Effects
+
+<AccordionGroup>
+  <Accordion title="Window Decorations">
+    - **Rounding**: Windows have 9px rounded corners
+    - **Active Opacity**: 1.0 (fully opaque)
+    - **Inactive Opacity**: 0.85 (slightly transparent)
+    - **Dim Strength**: 0.2 for inactive windows
+  </Accordion>
+
+  <Accordion title="Blur Effects">
+    Gaussian blur is enabled for translucent windows:
+    - Size: 8px
+    - Passes: 1
+    - Optimizations enabled
+    - Special workspace blur support
+  </Accordion>
+
+  <Accordion title="Shadows">
+    Subtle drop shadows enhance depth:
+    - Range: 6px
+    - Render power: 2
+    - Color: `rgba(1a1a1aee)`
+  </Accordion>
+</AccordionGroup>
+
+## Workspace Management
+
+Hyprland supports 10 standard workspaces plus special workspaces.
+
+### Standard Workspaces
+
+<CodeGroup>
+```bash Switch Workspace
+# Super + 1-0 switches to workspace 1-10
+Super + 1  # Workspace 1
+Super + 2  # Workspace 2
+# ... and so on
+```
+
+```bash Move Window
+# Super + Shift + 1-0 moves window to workspace
+Super + Shift + 1  # Move to workspace 1
+Super + Shift + 2  # Move to workspace 2
+```
+</CodeGroup>
+
+### Special Workspaces
+
+Special workspaces act as scratchpads that can be toggled on and off:
+
+```bash
+# Toggle special workspace "magic"
+Super + Tab
+
+# Move window to special workspace
+Super + Shift + Tab
+```
+
+## Window Rules
+
+Custom window rules provide intelligent window behavior:
+
+```conf
+# Wofi launcher - floating, centered, 50% size
+windowrule {
+    name = wofi-config
+    match:class = ^(wofi)$
+    float = on
+    size = 50% 50%
+    center = on
+}
+
+# Pavucontrol - floating, 80% size
+windowrule {
+    name = pavucontrol-config
+    match:class = ^(pavucontrol)$
+    float = on
+    size = 80% 80%
+}
+
+# Notifications - pinned and floating
+windowrule {
+    name = notifications
+    match:class = ^(mako)$
+    pin = on
+    float = on
+}
+```
+
+## General Settings
+
+The window manager uses the master layout with smart gap management:
+
+<CardGroup cols={2}>
+  <Card title="Borders" icon="border-outer">
+    - Size: 2px
+    - Active: Blue accent
+    - Inactive: Surface0
+  </Card>
+  
+  <Card title="Gaps" icon="grid-2">
+    - Inner gaps: 5px
+    - Outer gaps: 9px
+  </Card>
+  
+  <Card title="Layout" icon="table-layout">
+    - Default: Master layout
+    - Resize on border: Enabled
+    - Border grab area: 15px
+  </Card>
+  
+  <Card title="Snapping" icon="magnet">
+    - Window gap: 10px
+    - Monitor gap: 10px
+    - Respect gaps: Yes
+  </Card>
+</CardGroup>
+
+## Window Management Keybindings
+
+<AccordionGroup>
+  <Accordion title="Basic Controls">
+    | Key | Action |
+    |-----|--------|
+    | `Super + Q` | Kill active window |
+    | `Super + V` | Toggle floating |
+    | `Super + F11` | Fullscreen |
+    | `Super + F` | Swap with master |
+    | `Super + Shift + F` | Focus master |
+  </Accordion>
+
+  <Accordion title="Focus Movement">
+    | Key | Action |
+    |-----|--------|
+    | `Super + H` | Focus left |
+    | `Super + J` | Focus down |
+    | `Super + K` | Focus up |
+    | `Super + L` | Focus right |
+  </Accordion>
+
+  <Accordion title="Window Movement">
+    | Key | Action |
+    |-----|--------|
+    | `Super + Shift + H` | Move window left |
+    | `Super + Shift + J` | Move window down |
+    | `Super + Shift + K` | Move window up |
+    | `Super + Shift + L` | Move window right |
+  </Accordion>
+
+  <Accordion title="Resize Windows">
+    | Key | Action |
+    |-----|--------|
+    | `Ctrl + H` | Resize left -30px |
+    | `Ctrl + L` | Resize right +30px |
+    | `Ctrl + K` | Resize up -30px |
+    | `Ctrl + J` | Resize down +30px |
+  </Accordion>
+
+  <Accordion title="Mouse Actions">
+    | Key | Action |
+    |-----|--------|
+    | `Super + Left Click` | Move window |
+    | `Super + Right Click` | Resize window |
+    | `Super + Scroll Up` | Next workspace |
+    | `Super + Scroll Down` | Previous workspace |
+  </Accordion>
+</AccordionGroup>
+
+## Configuration Modules
+
+The Hyprland configuration is organized into modular files:
+
+```conf
+$modules = ~/.config/hypr/modules
+
+source = $modules/vars.conf         # Variables
+source = $modules/env.conf          # Environment variables
+source = $modules/input.conf        # Input devices
+source = $modules/monitors.conf     # Monitor configuration
+source = $modules/general.conf      # General settings
+source = $modules/theme.conf        # Theme and animations
+source = $modules/layout.conf       # Layout settings
+source = $modules/autostart.conf    # Autostart applications
+source = $modules/windowrules.conf  # Window rules
+source = $modules/binds.conf        # Keybindings
+```
+
+<Tip>
+  Edit individual module files in `~/.config/hypr/modules/` to customize specific aspects of Hyprland without touching the main configuration.
+</Tip>
+
+## Performance
+
+Optimized for performance with:
+
+- **VFR** (Variable Frame Rate): Enabled
+- **Manual resize animations**: Disabled for snappier feel
+- **Initial workspace tracking**: Level 1
+- **Close special on empty**: Disabled
+
+<Note>
+  The master layout provides efficient window management especially suited for development workflows where you often have one large primary window.
+</Note>

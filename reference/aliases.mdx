@@ -1,0 +1,536 @@
+---
+title: Shell Aliases
+description: Complete reference of all shell aliases and custom functions
+icon: terminal
+---
+
+## Overview
+
+Shell aliases are defined across multiple files in `system/zsh/`:
+- `aliases.zsh` - General aliases and utilities
+- `git.zsh` - Git-specific aliases and functions
+- `pacman.zsh` - Package manager aliases
+- `functions.zsh` - Custom shell functions
+
+## Navigation & Listing
+
+Modern file listing using [eza](https://github.com/eza-community/eza) (modern ls replacement).
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `ls` | `eza -a --icons=always --group-directories-first` | List all files with icons |
+| `ll` | `eza -al --icons=always --group-directories-first --git` | Long list with git status |
+| `lt` | `eza -a --tree --level=2 --icons=always --group-directories-first` | Tree view (2 levels) |
+| `l` | `eza -1 --icons=always --group-directories-first` | Single column list |
+| `lnew` | `eza -al --sort=modified --icons=always` | Sort by modification time |
+| `ldir` | `eza -aD --icons=always` | List directories only |
+| `lsd` | `eza -d */ --icons=always` | List subdirectories |
+| `tree` | `eza --tree --icons=always --group-directories-first` | Tree view (all levels) |
+| `treea` | `eza -al --tree --icons --git-ignore` | Tree with git-ignore |
+
+## ZSH Configuration
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `reload` | `exec zsh` | Reload ZSH configuration |
+| `zcg` | `$EDITOR $ZDOTDIR/.zshrc` | Edit .zshrc |
+| `zshplugins` | `$EDITOR $ZDOTDIR/.zsh_plugins.txt` | Edit plugin list |
+
+## System & File Operations
+
+### Basic Commands
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `cl` | `clear` | Clear terminal |
+| `q` | `exit` | Exit shell |
+| `ff` | `fastfetch` | Display system info |
+| `shutdown` | `systemctl poweroff` | Power off system |
+| `reboot` | `systemctl reboot` | Reboot system |
+| `suspend` | `systemctl suspend` | Suspend system |
+| `root` | `sudo su` | Switch to root user |
+
+### Safe File Operations
+
+Confirmation prompts for destructive operations.
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `rm` | `rm -i` | Remove with confirmation |
+| `cp` | `cp -i` | Copy with confirmation |
+| `mv` | `mv -i` | Move with confirmation |
+| `mkdir` | `mkdir -pv` | Create directories (verbose, parents) |
+
+## Search & Find
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `grep` | `grep --color=auto` | Grep with color output |
+| `fd` | `fd --hidden --follow` | Find files (include hidden, follow symlinks) |
+| `fdf` | `fd --type f --hidden --follow` | Find files only |
+| `fdd` | `fd --type d --hidden --follow` | Find directories only |
+
+## Viewing Files
+
+Using [bat](https://github.com/sharkdp/bat) - modern cat with syntax highlighting.
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `bat` | `bat --style=plain` | View file with syntax highlighting (plain) |
+| `bcat` | `bat --style=full` | View file with full decorations |
+
+## Utilities
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `wtf` | `dmesg \| tail -n 50` | Show last 50 kernel messages |
+| `wtfg` | `dmesg \| grep -i` | Search kernel messages |
+| `fuck` | `sudo $(fc -ln -1)` | Re-run last command with sudo |
+| `lg` | `lazygit` | Launch lazygit TUI |
+| `img` | `kitty +kitten icat` | Display image in terminal |
+| `fm` | `yazi` | Launch yazi file manager |
+
+## FZF Integration
+
+Fuzzy finder integrations for interactive selection.
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `fv` | `v $(fzf --preview "bat...")` | Fuzzy find and edit file |
+| `fkill` | `ps -ef \| fzf ... \| xargs kill -15` | Fuzzy find and kill process |
+| `fh` | `history \| fzf ... \| wl-copy` | Search history and copy to clipboard |
+
+<Tip>
+`fv` shows a preview of files using bat before opening them in your editor.
+</Tip>
+
+## Package Management (Pacman/Paru)
+
+### Installation & Removal
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `i` | `paru -S` | Install package |
+| `un` | `paru -Rns` | Uninstall package (with dependencies) |
+| `fix` | `sudo pacman -Syu --noconfirm` | Force system update |
+
+### Search & Info
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `s` | `paru -Ss` | Search for package |
+| `si` | `paru -Si` | Show package info (remote) |
+| `qi` | `pacman -Qi` | Show package info (installed) |
+| `qs` | `pacman -Qs` | Search installed packages |
+
+### Cleanup
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `clean` | `paru -Sc` | Clean package cache |
+| `cleanall` | `paru -Scc` | Clean all package cache |
+| `orphans` | `pacman -Qdt` | List orphaned packages |
+| `rmorphans` | Remove orphan packages | Remove all orphaned packages |
+
+### Package Queries
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `owns` | `pacman -Qo` | Find which package owns a file |
+| `lst` | `pacman -Qe` | List explicitly installed packages |
+| `lst-aur` | `pacman -Qm` | List AUR packages |
+
+### Package Functions
+
+<Accordion title="upgrade - Safe system upgrade">
+```bash
+function upgrade() {
+  sudo pacman -Sy
+  echo ":: Checking Arch Linux PGP Keyring..."
+  local installedver="$(LANG= sudo pacman -Qi archlinux-keyring | grep -Po '(?<=Version         : ).*')"
+  local currentver="$(LANG= sudo pacman -Si archlinux-keyring | grep -Po '(?<=Version         : ).*')"
+  if [ $installedver != $currentver ]; then
+    echo " Arch Linux PGP Keyring is out of date."
+    echo " Updating before full system upgrade."
+    sudo pacman -S --needed --noconfirm archlinux-keyring
+  else
+    echo " Arch Linux PGP Keyring is up to date."
+    echo " Proceeding with full system upgrade."
+  fi
+  paru -Su
+}
+```
+
+Safely upgrades the system by checking and updating the PGP keyring first to prevent signature errors.
+</Accordion>
+
+## Git Aliases
+
+### Status & Info
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `g` | `git` | Git shorthand |
+| `gst` | `git status` | Show status |
+| `gss` | `git status --short` | Short status |
+| `gsb` | `git status --short --branch` | Short status with branch |
+
+### Add (Staging)
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `ga` | `git add` | Add files |
+| `gaa` | `git add --all` | Add all files |
+| `gapa` | `git add --patch` | Add interactively |
+| `gau` | `git add --update` | Add modified files |
+| `gap` | `git add --patch` | Interactive patch mode |
+
+### Commit
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gc` | `git commit --verbose` | Commit with verbose diff |
+| `gcm` | `git commit --message` | Commit with message |
+| `gcam` | `git commit --all --message` | Commit all with message |
+| `gca` | `git commit --verbose --all` | Commit all (verbose) |
+| `gcs` | `git commit --gpg-sign` | Commit with GPG signature |
+| `gcasm` | `git commit --all --signoff --message` | Commit all with signoff |
+
+#### Amend Commits
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gc!` | `git commit --verbose --amend` | Amend last commit |
+| `gca!` | `git commit --verbose --all --amend` | Amend with all changes |
+| `gcn!` | `git commit --verbose --no-edit --amend` | Amend without editing message |
+| `gcan!` | `git commit --verbose --all --no-edit --amend` | Amend all without editing |
+| `gcf` | `git commit --fixup` | Create fixup commit |
+
+### Branches
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gb` | `git branch` | List branches |
+| `gba` | `git branch --all` | List all branches (including remote) |
+| `gbd` | `git branch --delete` | Delete branch |
+| `gbD` | `git branch --delete --force` | Force delete branch |
+| `gbm` | `git branch --move` | Rename branch |
+| `gbr` | `git branch --remote` | List remote branches |
+
+#### Clean Gone Branches
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gbg` | List "gone" branches | Show branches deleted on remote |
+| `gbgd` | Delete gone branches | Delete local branches removed from remote |
+| `gbgD` | Force delete gone branches | Force delete gone branches |
+
+### Checkout & Switch
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gco` | `git checkout` | Checkout branch/commit |
+| `gcb` | `git checkout -b` | Create and checkout branch |
+| `gcm` | `git checkout $(git_main_branch)` | Checkout main/master |
+| `gcd` | `git checkout $(git_develop_branch)` | Checkout develop branch |
+
+#### Git Switch (Git 2.23+)
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gsw` | `git switch` | Switch branch |
+| `gswc` | `git switch --create` | Create and switch to branch |
+| `gswm` | `git switch $(git_main_branch)` | Switch to main/master |
+| `gswd` | `git switch $(git_develop_branch)` | Switch to develop |
+
+### Diff
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gd` | `git diff` | Show changes |
+| `gdca` | `git diff --cached` | Show staged changes |
+| `gds` | `git diff --staged` | Show staged changes |
+| `gdw` | `git diff --word-diff` | Word-level diff |
+| `gdt` | `git diff-tree --no-commit-id --name-only -r` | Show files in commit |
+
+### Fetch
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gf` | `git fetch` | Fetch changes |
+| `gfa` | `git fetch --all --prune` | Fetch all and prune |
+| `gfo` | `git fetch origin` | Fetch from origin |
+
+### Pull
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gl` | `git pull` | Pull changes |
+| `gpr` | `git pull --rebase` | Pull with rebase |
+| `gpra` | `git pull --rebase --autostash` | Pull rebase with autostash |
+| `gluc` | `git pull upstream $(git_current_branch)` | Pull from upstream (current) |
+| `glum` | `git pull upstream $(git_main_branch)` | Pull from upstream (main) |
+| `ggl` | `git pull origin $(git_current_branch)` | Pull current branch from origin |
+| `gprom` | `git pull --rebase origin $(git_main_branch)` | Rebase on origin/main |
+
+### Push
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gp` | `git push` | Push changes |
+| `gpf` | `git push --force-with-lease` | Safe force push |
+| `gpf!` | `git push --force` | Force push (dangerous) |
+| `gpv` | `git push --verbose` | Push with verbose output |
+| `gpu` | `git push upstream` | Push to upstream |
+| `ggp` | `git push origin $(git_current_branch)` | Push current branch |
+| `gpsup` | `git push --set-upstream origin $(git_current_branch)` | Push and set upstream |
+| `gpoat` | `git push origin --all && git push origin --tags` | Push all + tags |
+
+### Log
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `glo` | `git log --oneline --decorate` | One-line log |
+| `glog` | `git log --oneline --decorate --graph` | Graph log |
+| `gloga` | `git log --oneline --decorate --graph --all` | Graph log (all branches) |
+| `glg` | `git log --stat` | Log with stats |
+| `glgp` | `git log --stat --patch` | Log with patch |
+| `glol` | Pretty graph log | Colored graph with author |
+| `glola` | Pretty graph log (all) | Colored graph (all branches) |
+| `glod` | Pretty graph (dates) | With commit dates |
+
+### Merge & Rebase
+
+#### Merge
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gm` | `git merge` | Merge branch |
+| `gma` | `git merge --abort` | Abort merge |
+| `gmom` | `git merge origin/$(git_main_branch)` | Merge origin/main |
+| `gms` | `git merge --squash` | Squash merge |
+
+#### Rebase
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `grb` | `git rebase` | Rebase branch |
+| `grba` | `git rebase --abort` | Abort rebase |
+| `grbc` | `git rebase --continue` | Continue rebase |
+| `grbi` | `git rebase --interactive` | Interactive rebase |
+| `grbm` | `git rebase $(git_main_branch)` | Rebase on main |
+| `grbom` | `git rebase origin/$(git_main_branch)` | Rebase on origin/main |
+
+### Reset & Restore
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `grh` | `git reset` | Reset changes |
+| `grhh` | `git reset --hard` | Hard reset (discard all) |
+| `grhs` | `git reset --soft` | Soft reset (keep changes staged) |
+| `gpristine` | `git reset --hard && git clean -dfx` | Reset to pristine state |
+| `grs` | `git restore` | Restore files (Git 2.23+) |
+| `grst` | `git restore --staged` | Unstage files |
+
+### Stash
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gsta` | `git stash push` | Stash changes |
+| `gstaa` | `git stash apply` | Apply stash |
+| `gstl` | `git stash list` | List stashes |
+| `gstp` | `git stash pop` | Pop stash |
+| `gstd` | `git stash drop` | Drop stash |
+| `gstc` | `git stash clear` | Clear all stashes |
+| `gsts` | `git stash show --patch` | Show stash diff |
+
+### Cherry-Pick
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gcp` | `git cherry-pick` | Cherry-pick commit |
+| `gcpa` | `git cherry-pick --abort` | Abort cherry-pick |
+| `gcpc` | `git cherry-pick --continue` | Continue cherry-pick |
+
+### Remote
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gr` | `git remote` | List remotes |
+| `grv` | `git remote --verbose` | List remotes (verbose) |
+| `gra` | `git remote add` | Add remote |
+| `grrm` | `git remote remove` | Remove remote |
+| `grset` | `git remote set-url` | Set remote URL |
+
+### Other Git Commands
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gcl` | `git clone --recurse-submodules` | Clone with submodules |
+| `gclean` | `git clean --interactive -d` | Clean untracked files |
+| `gcount` | `git shortlog --summary --numbered` | Commit count by author |
+| `gignore` | `git update-index --assume-unchanged` | Ignore file changes |
+| `gunignore` | `git update-index --no-assume-unchanged` | Unignore file changes |
+| `grm` | `git rm` | Remove file |
+| `grmc` | `git rm --cached` | Remove from index only |
+| `gsh` | `git show` | Show commit |
+| `grev` | `git revert` | Revert commit |
+| `grf` | `git reflog` | Show reflog |
+| `gta` | `git tag --annotate` | Create annotated tag |
+| `gtl` | `git tag --sort=-v:refname -n --list` | List tags |
+| `grt` | `cd "$(git rev-parse --show-toplevel)"` | Go to repo root |
+
+### Worktree (Git 2.5+)
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `gwt` | `git worktree` | Worktree command |
+| `gwta` | `git worktree add` | Add worktree |
+| `gwtls` | `git worktree list` | List worktrees |
+| `gwtrm` | `git worktree remove` | Remove worktree |
+
+### Git Helper Functions
+
+<AccordionGroup>
+  <Accordion title="git_current_branch - Get current branch name">
+    ```bash
+    function git_current_branch() {
+      git symbolic-ref --short HEAD 2>/dev/null || \
+      git rev-parse --short HEAD 2>/dev/null || return 1
+    }
+    ```
+    Returns the current branch name or short commit hash.
+  </Accordion>
+
+  <Accordion title="git_main_branch - Detect main/master branch">
+    ```bash
+    function git_main_branch() {
+      git rev-parse --git-dir &>/dev/null || return
+      
+      local ref
+      for ref in refs/{heads,remotes/{origin,upstream}}/{main,trunk,master}; do
+        if git show-ref -q --verify $ref 2>/dev/null; then
+          echo ${ref:t}
+          return 0
+        fi
+      done
+      
+      echo master
+      return 1
+    }
+    ```
+    Intelligently detects whether the repo uses `main`, `master`, or `trunk`.
+  </Accordion>
+
+  <Accordion title="git_develop_branch - Detect develop branch">
+    ```bash
+    function git_develop_branch() {
+      git rev-parse --git-dir &>/dev/null || return
+      
+      local branch
+      for branch in dev devel develop development; do
+        if git show-ref -q --verify refs/heads/$branch 2>/dev/null; then
+          echo $branch
+          return 0
+        fi
+      done
+      
+      echo develop
+      return 1
+    }
+    ```
+    Detects the development branch name.
+  </Accordion>
+</AccordionGroup>
+
+## Custom Shell Functions
+
+<AccordionGroup>
+  <Accordion title="mkcd - Create directory and cd into it">
+    ```bash
+    mkcd() {
+        mkdir -p "$1" && cd "$1"
+    }
+    ```
+    Creates a directory (including parents) and changes into it.
+    
+    **Usage:** `mkcd ~/projects/new-project`
+  </Accordion>
+
+  <Accordion title="bak - Quick backup of a file">
+    ```bash
+    bak() {
+        cp "$1" "$1.bak"
+    }
+    ```
+    Creates a `.bak` copy of a file.
+    
+    **Usage:** `bak important-file.txt`
+  </Accordion>
+
+  <Accordion title="up - Navigate up multiple directory levels">
+    ```bash
+    up() {
+        local d=""
+        local limit=${1:-1}
+        for ((i=1 ; i <= limit ; i++)); do
+            d="${d}../"
+        done
+        cd "$d"
+    }
+    ```
+    Go up N directory levels.
+    
+    **Usage:** `up 3` (goes up 3 levels)
+  </Accordion>
+
+  <Accordion title="down - Navigate down using fzf">
+    ```bash
+    down() {
+        if ! command -v fd &> /dev/null || ! command -v fzf &> /dev/null; then
+            echo "down: requires 'fd' and 'fzf'" >&2
+            return 1
+        fi
+
+        local depth=${1:-1}
+        local target=$(fd --type d --max-depth "$depth" . | fzf)
+        [[ -n "$target" ]] && cd "$target"
+    }
+    ```
+    Fuzzy find and navigate to a subdirectory.
+    
+    **Usage:** `down 3` (search 3 levels deep)
+  </Accordion>
+</AccordionGroup>
+
+## Summary
+
+<CardGroup cols={2}>
+  <Card title="General Aliases" icon="terminal">
+    - Navigation & listing
+    - File operations
+    - System commands
+    - FZF integrations
+  </Card>
+  <Card title="Git Aliases" icon="code-branch">
+    - 80+ git aliases
+    - Smart branch detection
+    - Helper functions
+    - Worktree support
+  </Card>
+  <Card title="Package Management" icon="box">
+    - Install/remove
+    - Search & info
+    - Cache cleanup
+    - Orphan management
+  </Card>
+  <Card title="Custom Functions" icon="function">
+    - mkcd, bak
+    - up, down
+    - Navigation helpers
+  </Card>
+</CardGroup>
+
+<Tip>
+All aliases use modern CLI tools like `eza`, `bat`, and `fd` for better performance and user experience.
+</Tip>

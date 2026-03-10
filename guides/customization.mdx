@@ -1,0 +1,285 @@
+---
+title: Customization Guide
+description: Learn how to customize your Hyprland setup to match your preferences
+---
+
+This guide will help you customize your Hyprland dotfiles configuration while maintaining compatibility with future updates.
+
+## Understanding the Configuration Structure
+
+The configuration is organized into modular components:
+
+- **hyprland/hypr/modules/** - Modular Hyprland configuration files
+- **dots/** - WM-agnostic application configs (Kitty, Neovim, etc.)
+- **system/** - System-level configurations (Zsh, Paru, etc.)
+- **hyprland/waybar/** - Status bar configuration
+- **hyprland/rofi/** - Application launcher styling
+
+## Changing Themes and Colors
+
+### Hyprland Color Scheme
+
+Colors are centrally defined in `~/.config/hypr/modules/vars.conf`:
+
+```conf
+# COLORS
+$mauve = rgba(c6a0f6ff)
+$blue = rgba(8aadf4ff)
+$red = rgba(ed8796ff)
+$green = rgba(a6da95ff)
+$peach = rgba(f5a97fff)
+
+# Backgrounds
+$mantle = rgba(1a1a1aee)
+$base = rgba(24273aff)
+$surface0 = rgba(49495aff)
+$surface1 = rgba(565a7aff)
+$surface2 = rgba(6d7899ff)
+
+# Text
+$text = rgba(cad1d9ff)
+$subtext0 = rgba(a5adcbff)
+$subtext1 = rgba(b8c5d6ff)
+```
+
+<Tip>
+  Edit these color variables to change the entire color scheme. All components reference these variables, ensuring consistency across your setup.
+</Tip>
+
+### Window Theming
+
+Customize window appearance in `~/.config/hypr/modules/theme.conf`:
+
+```conf
+decoration {
+    rounding = 9              # Corner radius
+    dim_inactive = true       # Dim unfocused windows
+    dim_strength = 0.2        # Dimming intensity
+    
+    active_opacity = 1.0
+    inactive_opacity = 0.85   # Transparency for inactive windows
+    
+    blur {
+        enabled = true
+        size = 8              # Blur radius
+        passes = 1            # Blur quality
+    }
+}
+```
+
+### Application-Specific Themes
+
+**Kitty Terminal** uses Catppuccin Macchiato theme in `~/.config/kitty/theme.conf`. To change it:
+
+1. Browse [Kitty themes](https://github.com/kovidgoyal/kitty-themes)
+2. Download your preferred theme to `~/.config/kitty/theme.conf`
+3. Restart Kitty or run `kitty @ set-colors ~/.config/kitty/theme.conf`
+
+**Waybar** styles are in `~/.config/waybar/style.css`:
+
+```css
+@define-color bg #1e1e2e;
+@define-color mauve #cba6f7;
+@define-color blue #89b4fa;
+```
+
+Modify these variables to match your color scheme.
+
+## Modifying Keybindings
+
+All keybindings are defined in `~/.config/hypr/modules/binds.conf`. See the [Keybindings Reference](/guides/keybindings) for the complete list.
+
+### Changing the Main Modifier Key
+
+The default modifier is the Super (Windows) key. To change it, edit `~/.config/hypr/modules/vars.conf`:
+
+```conf
+$mainMod = SUPER      # Change to ALT, CTRL, etc.
+$ctrlMod = Control_L
+$altMod = ALT_L
+```
+
+### Adding Custom Keybindings
+
+Add new bindings to `~/.config/hypr/modules/binds.conf`:
+
+```conf
+# Launch your favorite app
+bind = $mainMod, B, exec, brave
+
+# Custom script
+bind = $mainMod Shift, S, exec, ~/.local/bin/my-script.sh
+```
+
+<Warning>
+  After modifying keybindings, reload Hyprland with `Super + Shift + R` or restart your session.
+</Warning>
+
+## Adding or Removing Applications
+
+### Default Applications
+
+Change default applications in `~/.config/hypr/modules/vars.conf`:
+
+```conf
+$terminal = kitty        # Change to: alacritty, foot, etc.
+$fileManager = nemo      # Change to: thunar, dolphin, etc.
+$menu = rofi -show drun  # Application launcher
+$browser = brave         # Default browser
+$lock = hyprlock        # Lock screen
+```
+
+### Autostart Applications
+
+Edit `~/.config/hypr/modules/autostart.conf` to launch applications on startup:
+
+```conf
+exec-once = waybar
+exec-once = hypridle
+exec-once = swaync
+
+# Add your applications
+exec-once = discord
+exec-once = spotify
+```
+
+### Installing New Packages
+
+See the [Adding Packages Guide](/guides/adding-packages) for detailed instructions on package management.
+
+## Animation Settings
+
+Customize animation curves and speeds in `~/.config/hypr/modules/theme.conf`:
+
+```conf
+animations {
+    enabled = yes
+    
+    bezier = myBezier, 0.05, 0.9, 0.1, 1.05
+    
+    animation = windows, 1, 7, myBezier
+    animation = workspaces, 1, 6, easeInOutQuad
+}
+```
+
+Adjust the second number (duration multiplier) to make animations faster (lower) or slower (higher).
+
+## Monitor Configuration
+
+Configure displays in `~/.config/hypr/modules/monitors.conf`:
+
+```conf
+# Single monitor
+monitor = ,preferred,auto,1
+
+# Multiple monitors
+monitor = DP-1,1920x1080@144,0x0,1
+monitor = HDMI-A-1,1920x1080@60,1920x0,1
+```
+
+## Best Practices for Customization
+
+<Accordion title="Keep a backup of your changes">
+  Before making major changes, create a backup:
+  
+  ```bash
+  cp -r ~/.config/hypr ~/.config/hypr.backup
+  ```
+</Accordion>
+
+<Accordion title="Test changes incrementally">
+  Make one change at a time and reload Hyprland (`Super + Shift + R`) to test. This helps identify issues quickly.
+</Accordion>
+
+<Accordion title="Document your customizations">
+  Add comments to your config files explaining why you made specific changes. This helps when troubleshooting or sharing your setup.
+  
+  ```conf
+  # Increased blur for better readability on busy wallpapers
+  blur {
+      size = 12
+  }
+  ```
+</Accordion>
+
+<Accordion title="Use version control">
+  Initialize a git repository in your dotfiles to track changes:
+  
+  ```bash
+  cd ~/dotfiles
+  git init
+  git add .
+  git commit -m "Initial customizations"
+  ```
+</Accordion>
+
+## Keeping Your Changes While Updating
+
+### Method 1: Git Stash (Recommended)
+
+When updating the dotfiles repository:
+
+```bash
+cd ~/dotfiles
+
+# Save your changes
+git stash
+
+# Pull updates
+git pull
+
+# Reapply your changes
+git stash pop
+```
+
+Resolve any conflicts manually, keeping your preferred settings.
+
+### Method 2: Separate Custom Config
+
+Create a custom config file that won't be overwritten:
+
+```conf
+# In ~/.config/hypr/hyprland.conf, add at the end:
+source = ~/.config/hypr/custom.conf
+```
+
+Put your customizations in `~/.config/hypr/custom.conf`. This file will override settings from the main config.
+
+### Method 3: Fork and Maintain
+
+For extensive customizations:
+
+1. Fork the dotfiles repository on GitHub
+2. Clone your fork instead of the original
+3. Merge updates from upstream when needed
+
+```bash
+git remote add upstream https://github.com/original/dotfiles
+git fetch upstream
+git merge upstream/main
+```
+
+## Wallpaper Management
+
+While not included in the base configuration, you can add wallpaper management:
+
+```bash
+# Install hyprpaper or swww
+paru -S hyprpaper
+
+# Add to autostart.conf
+exec-once = hyprpaper
+```
+
+Create `~/.config/hypr/hyprpaper.conf`:
+
+```conf
+preload = ~/Pictures/wallpaper.jpg
+wallpaper = ,~/Pictures/wallpaper.jpg
+```
+
+## Next Steps
+
+- Explore the [Keybindings Reference](/guides/keybindings) to master window management
+- Learn about [Themes](/guides/themes) for coordinated styling
+- Check [Troubleshooting](/guides/troubleshooting) if you encounter issues

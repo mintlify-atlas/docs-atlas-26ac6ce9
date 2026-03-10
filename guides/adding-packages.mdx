@@ -1,0 +1,529 @@
+---
+title: Adding Packages
+description: Learn how to manage packages and keep your system synchronized with the dotfiles
+---
+
+This guide explains how package management works with these dotfiles and how to add, update, or remove packages while maintaining synchronization.
+
+## Package Management System
+
+The dotfiles use a declarative package management approach:
+
+- **packages.txt** - Central package list
+- **Paru** - AUR helper for installing packages
+- **Dotbot** - Automation tool that syncs packages
+
+## Understanding packages.txt
+
+The `packages.txt` file in the dotfiles repository root contains all required packages:
+
+```txt
+bat
+bibata-cursor-theme-bin
+brave-bin
+brightnessctl
+btop
+eza
+fastfetch
+kitty
+pavucontrol
+polkit-gnome
+qt6-wayland
+neovim
+awww-bin
+hyprland
+hypridle
+hyprlock
+hyprshot
+rofi
+waybar
+wl-clipboard
+wlogout
+grim
+slurp
+satty
+imv
+swaync
+xdg-desktop-portal-hyprland
+xdg-user-dirs
+jq
+yazi
+zsh
+zsh-antidote
+lazygit
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+noto-fonts-extra
+ttf-bitstream-vera
+ttf-dejavu
+ttf-jetbrains-mono-nerd
+ttf-liberation
+ttf-opensans
+inter-font
+papirus-icon-theme
+```
+
+### Package Categories
+
+The packages are organized by purpose:
+
+**Core System:**
+- `hyprland` - Window manager
+- `waybar` - Status bar
+- `kitty` - Terminal emulator
+- `rofi` - Application launcher
+
+**Session Management:**
+- `hypridle` - Idle daemon
+- `hyprlock` - Screen locker
+- `polkit-gnome` - Authentication agent
+- `xdg-desktop-portal-hyprland` - Portal for desktop integration
+
+**Utilities:**
+- `brightnessctl` - Brightness control
+- `pavucontrol` - Audio control
+- `wl-clipboard` - Clipboard manager
+- `btop` - System monitor
+- `eza` - Better `ls`
+- `bat` - Better `cat`
+- `yazi` - File manager TUI
+
+**Screenshots:**
+- `hyprshot` - Screenshot tool
+- `grim` - Screenshot backend
+- `slurp` - Region selector
+- `satty` - Screenshot annotation
+- `imv` - Image viewer
+
+**Fonts:**
+- `ttf-jetbrains-mono-nerd` - Nerd Font with icons
+- `noto-fonts-*` - Comprehensive font coverage
+- `inter-font` - UI font
+
+**Shell:**
+- `zsh` - Shell
+- `zsh-antidote` - Plugin manager
+- `lazygit` - Git TUI
+
+## How Package Installation Works
+
+The `install.conf.yaml` contains a shell command that automatically installs missing packages:
+
+```yaml
+- shell:
+    - command: |
+        missing=$(comm -23 <(sort packages.txt) <(pacman -Qq | sort))
+        if [ -n "$missing" ]; then
+          echo -e "\e[33mInstalling missing packages:\e[0m $missing"
+          paru -S --needed --noconfirm $missing
+        else
+          echo -e "\e[32mSystem up to date\e[0m"
+        fi
+      description: Installing packages
+```
+
+This script:
+1. Compares `packages.txt` with installed packages
+2. Identifies missing packages
+3. Installs them using Paru
+4. Skips already-installed packages (`--needed`)
+
+## Adding New Packages
+
+### Method 1: Edit packages.txt (Recommended)
+
+This method keeps your dotfiles synchronized:
+
+1. **Edit the package list:**
+   ```bash
+   cd ~/dotfiles
+   nvim packages.txt
+   ```
+
+2. **Add your package** (one per line):
+   ```txt
+   # Add at the end
+   discord
+   spotify
+   obsidian
+   ```
+
+3. **Run the install script:**
+   ```bash
+   ./install
+   ```
+
+The script will automatically install the new packages.
+
+<Tip>
+  Keep packages organized by category with comments for better maintainability:
+  
+  ```txt
+  # Communication
+  discord
+  slack
+  
+  # Media
+  spotify
+  vlc
+  ```
+</Tip>
+
+### Method 2: Manual Installation
+
+For quick testing without modifying the dotfiles:
+
+```bash
+# Install from official repositories
+sudo pacman -S package-name
+
+# Install from AUR
+paru -S aur-package-name
+
+# Install multiple packages
+paru -S package1 package2 package3
+```
+
+<Warning>
+  Manually installed packages won't be tracked in `packages.txt`. Add them later to maintain synchronization across systems.
+</Warning>
+
+## Finding Packages
+
+### Search Official Repositories
+
+```bash
+# Search package databases
+pacman -Ss search-term
+
+# Get package information
+pacman -Si package-name
+```
+
+### Search AUR
+
+```bash
+# Search AUR packages
+paru -Ss search-term
+
+# Get AUR package info
+paru -Si aur-package
+```
+
+### Check Package Contents
+
+```bash
+# List files in a package
+pacman -Ql package-name
+
+# Find which package owns a file
+pacman -Qo /path/to/file
+```
+
+## Removing Packages
+
+### Remove from System
+
+```bash
+# Remove package only
+sudo pacman -R package-name
+
+# Remove package and unused dependencies
+sudo pacman -Rs package-name
+
+# Remove package, dependencies, and config files
+sudo pacman -Rns package-name
+```
+
+### Remove from packages.txt
+
+1. Edit `~/dotfiles/packages.txt`
+2. Delete the package line
+3. Commit the change (if using git)
+
+<Accordion title="Clean up orphaned packages">
+  Remove packages that were installed as dependencies but are no longer needed:
+  
+  ```bash
+  # List orphaned packages
+  pacman -Qtdq
+  
+  # Remove all orphaned packages
+  sudo pacman -Rns $(pacman -Qtdq)
+  ```
+</Accordion>
+
+## Updating Packages
+
+### Update All Packages
+
+```bash
+# Update package databases and upgrade all packages
+paru -Syu
+
+# Force refresh databases
+paru -Syyu
+```
+
+### Update Specific Package
+
+```bash
+# Update single package
+paru -S package-name
+```
+
+### Update AUR Packages Only
+
+```bash
+# Update only AUR packages
+paru -Sua
+```
+
+<Tip>
+  Run `paru -Syu` regularly (at least weekly) to keep your system secure and up-to-date.
+</Tip>
+
+## Working with Paru
+
+### What is Paru?
+
+Paru is an AUR helper that:
+- Manages both official and AUR packages
+- Handles dependency resolution
+- Reviews PKGBUILDs before building
+- Supports all `pacman` commands
+
+### Common Paru Commands
+
+```bash
+# Install package
+paru -S package-name
+
+# Search packages
+paru -Ss search-term
+
+# Update all packages
+paru -Syu
+
+# Remove package
+paru -R package-name
+
+# Clean package cache
+paru -Sc
+
+# View package info
+paru -Si package-name
+
+# List installed packages
+paru -Q
+```
+
+### Paru Configuration
+
+Configure Paru in `~/.config/paru/paru.conf`:
+
+```conf
+[options]
+BottomUp
+SudoLoop
+NewsOnUpgrade
+```
+
+## Package Installation Tips
+
+### Install Without Confirmation
+
+Useful for scripts:
+
+```bash
+paru -S --needed --noconfirm package-name
+```
+
+- `--needed` - Skip if already installed
+- `--noconfirm` - Don't ask for confirmation
+
+### Install as Dependency
+
+Mark package as dependency (will be removed with orphan cleanup):
+
+```bash
+paru -S --asdeps package-name
+```
+
+### Review PKGBUILD Before Installing
+
+For AUR packages, always review the build script:
+
+```bash
+# Paru shows PKGBUILD by default
+paru -S aur-package
+
+# View without installing
+paru -Gp aur-package
+```
+
+<Warning>
+  Always review PKGBUILDs from AUR packages. Malicious code can be hidden in build scripts.
+</Warning>
+
+## Synchronizing Across Systems
+
+### Clone to New System
+
+The package system makes it easy to replicate your setup:
+
+```bash
+# Clone dotfiles
+git clone --recurse-submodules https://github.com/your-repo/dotfiles ~/dotfiles
+
+# Run installer (installs all packages from packages.txt)
+cd ~/dotfiles
+./install
+```
+
+All packages are automatically installed on the new system.
+
+### Keep Multiple Systems in Sync
+
+1. **Add packages on System A:**
+   ```bash
+   cd ~/dotfiles
+   echo "new-package" >> packages.txt
+   git add packages.txt
+   git commit -m "Add new-package"
+   git push
+   ```
+
+2. **Update System B:**
+   ```bash
+   cd ~/dotfiles
+   git pull
+   ./install  # Installs newly added packages
+   ```
+
+## Package Dependencies
+
+### View Package Dependencies
+
+```bash
+# Show required dependencies
+pacman -Si package-name | grep Depends
+
+# Show optional dependencies
+pacman -Si package-name | grep Optional
+
+# Show dependency tree
+pactree package-name
+```
+
+### Install Optional Dependencies
+
+```bash
+# View optional dependencies
+pacman -Qi package-name
+
+# Install specific optional dependency
+paru -S optional-dependency
+```
+
+## Troubleshooting
+
+### Package Not Found
+
+**Error:** `error: target not found: package-name`
+
+**Solutions:**
+1. Check spelling: `paru -Ss partial-name`
+2. Update databases: `paru -Sy`
+3. Search AUR: `paru -Ss package-name`
+
+### Conflicting Packages
+
+**Error:** `package-name and other-package are in conflict`
+
+**Solution:** Remove the conflicting package first:
+```bash
+paru -R conflicting-package
+paru -S new-package
+```
+
+### Failed to Build AUR Package
+
+**Error:** Build errors during AUR installation
+
+**Solutions:**
+1. Update system: `paru -Syu`
+2. Install `base-devel`: `sudo pacman -S base-devel`
+3. Check AUR comments for known issues
+4. Report issue on AUR package page
+
+### Database Lock Error
+
+**Error:** `error: failed to init transaction (unable to lock database)`
+
+**Solution:**
+```bash
+# Remove stale lock file
+sudo rm /var/lib/pacman/db.lck
+```
+
+<Warning>
+  Only remove the lock file if you're certain no other package manager is running.
+</Warning>
+
+## Best Practices
+
+<Accordion title="Keep packages.txt updated">
+  Whenever you manually install a package you want to keep, add it to `packages.txt` to ensure it's tracked.
+</Accordion>
+
+<Accordion title="Group related packages">
+  Organize packages by category with comments for better maintainability:
+  
+  ```txt
+  # Development
+  neovim
+  lazygit
+  docker
+  
+  # Browsers
+  brave-bin
+  firefox
+  ```
+</Accordion>
+
+<Accordion title="Use --needed flag">
+  Always use `paru -S --needed` to avoid reinstalling packages unnecessarily.
+</Accordion>
+
+<Accordion title="Regular maintenance">
+  Run these commands periodically:
+  
+  ```bash
+  # Update everything
+  paru -Syu
+  
+  # Clean package cache
+  paru -Sc
+  
+  # Remove orphaned packages
+  paru -Rns $(paru -Qtdq)
+  ```
+</Accordion>
+
+<Accordion title="Backup before major updates">
+  Before system upgrades, create a backup:
+  
+  ```bash
+  # List installed packages
+  pacman -Qqe > ~/installed-packages.txt
+  ```
+</Accordion>
+
+## See Also
+
+- [Installation Guide](/installation) - Initial setup
+- [Customization Guide](/guides/customization) - Customize application settings
+- [Arch Wiki: Pacman](https://wiki.archlinux.org/title/Pacman) - Package manager documentation
+- [Paru GitHub](https://github.com/Morganamilo/paru) - AUR helper repository

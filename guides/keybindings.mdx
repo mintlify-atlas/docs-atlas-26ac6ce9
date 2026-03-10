@@ -1,0 +1,323 @@
+---
+title: Keybinding Reference
+description: Complete reference of all keyboard shortcuts and mouse bindings in Hyprland
+---
+
+This page documents all keybindings configured in `~/.config/hypr/modules/binds.conf`.
+
+## Modifier Keys
+
+The configuration uses these modifier key variables defined in `vars.conf`:
+
+| Variable | Key | Default |
+|----------|-----|--------|
+| `$mainMod` | Primary modifier | `SUPER` (Windows key) |
+| `$ctrlMod` | Control modifier | `Control_L` |
+| `$altMod` | Alt modifier | `ALT_L` |
+
+## Program Launchers
+
+Launch your essential applications:
+
+| Keybinding | Action | Application |
+|------------|--------|-------------|
+| `Super + Return` | Open terminal | Kitty |
+| `Super + E` | Open file manager | Nemo |
+| `Super + Space` | Application launcher | Rofi |
+
+### Application Variables
+
+These programs are defined in `vars.conf` and can be customized:
+
+```conf
+$terminal = kitty
+$fileManager = nemo
+$menu = rofi -show drun
+$browser = brave
+$lock = hyprlock
+```
+
+## System Controls
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Shift + R` | Reload Hyprland configuration |
+| `Super + M` | Open logout menu (wlogout) |
+| `Super + Shift + Q` | Lock screen |
+| `Super + F11` | Toggle fullscreen |
+
+## Window Management
+
+### Basic Window Operations
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Q` | Close active window |
+| `Super + V` | Toggle floating mode |
+| `Super + F` | Swap window with master |
+| `Super + Shift + F` | Focus master window |
+
+### Focus Movement (Vim-style)
+
+Move focus between windows using Vim keybindings:
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super + H` | Focus left |
+| `Super + L` | Focus right |
+| `Super + K` | Focus up |
+| `Super + J` | Focus down |
+
+```conf
+bind = $mainMod, h, movefocus, l
+bind = $mainMod, l, movefocus, r
+bind = $mainMod, k, movefocus, u
+bind = $mainMod, j, movefocus, d
+```
+
+### Move Windows
+
+Move windows in the layout using Shift + Vim keys:
+
+| Keybinding | Direction |
+|------------|----------|
+| `Super + Shift + H` | Move window left |
+| `Super + Shift + L` | Move window right |
+| `Super + Shift + K` | Move window up |
+| `Super + Shift + J` | Move window down |
+
+```conf
+bind = $mainMod Shift, H, movewindow, l
+bind = $mainMod Shift, J, movewindow, d
+bind = $mainMod Shift, K, movewindow, u
+bind = $mainMod Shift, L, movewindow, r
+```
+
+### Resize Windows
+
+Resize the active window using Control + Vim keys:
+
+| Keybinding | Resize Action |
+|------------|---------------|
+| `Control + H` | Decrease width by 30px |
+| `Control + L` | Increase width by 30px |
+| `Control + K` | Decrease height by 30px |
+| `Control + J` | Increase height by 30px |
+
+```conf
+binde = $ctrlMod, h, resizeactive, -30 0
+binde = $ctrlMod, l, resizeactive,  30 0
+binde = $ctrlMod, k, resizeactive,  0 -30
+binde = $ctrlMod, j, resizeactive,  0  30
+```
+
+<Tip>
+  The `binde` binding type allows you to hold the key for continuous resizing.
+</Tip>
+
+## Workspace Navigation
+
+### Switch to Workspace
+
+Switch between workspaces 1-10:
+
+| Keybinding | Workspace |
+|------------|----------|
+| `Super + 1` | Workspace 1 |
+| `Super + 2` | Workspace 2 |
+| `Super + 3` | Workspace 3 |
+| `Super + 4` | Workspace 4 |
+| `Super + 5` | Workspace 5 |
+| `Super + 6` | Workspace 6 |
+| `Super + 7` | Workspace 7 |
+| `Super + 8` | Workspace 8 |
+| `Super + 9` | Workspace 9 |
+| `Super + 0` | Workspace 10 |
+
+```conf
+bind = $mainMod, 1, workspace, 1
+bind = $mainMod, 2, workspace, 2
+# ... through 0
+```
+
+### Move Window to Workspace
+
+Move the active window to a specific workspace:
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Shift + 1` | Move to workspace 1 |
+| `Super + Shift + 2` | Move to workspace 2 |
+| `Super + Shift + 3` | Move to workspace 3 |
+| `Super + Shift + 4` | Move to workspace 4 |
+| `Super + Shift + 5` | Move to workspace 5 |
+| `Super + Shift + 6` | Move to workspace 6 |
+| `Super + Shift + 7` | Move to workspace 7 |
+| `Super + Shift + 8` | Move to workspace 8 |
+| `Super + Shift + 9` | Move to workspace 9 |
+| `Super + Shift + 0` | Move to workspace 10 |
+
+```conf
+bind = $mainMod Shift, 1, movetoworkspace, 1
+bind = $mainMod Shift, 2, movetoworkspace, 2
+# ... through 0
+```
+
+### Special Workspace (Scratchpad)
+
+The "magic" workspace acts as a scratchpad for temporary windows:
+
+| Keybinding | Action |
+|------------|--------|
+| `Super + Tab` | Toggle special workspace visibility |
+| `Super + Shift + Tab` | Move active window to special workspace |
+
+```conf
+bind = $mainMod, TAB, togglespecialworkspace, magic
+bind = $mainMod SHIFT, TAB, movetoworkspace, special:magic
+```
+
+<Tip>
+  Use the special workspace to hide windows you need quick access to, like a music player or chat application.
+</Tip>
+
+## Mouse Bindings
+
+### Scroll Between Workspaces
+
+| Mouse Action | Result |
+|------------|--------|
+| `Super + Scroll Up` | Next workspace |
+| `Super + Scroll Down` | Previous workspace |
+
+```conf
+bind = $mainMod, mouse_down, workspace, e+1
+bind = $mainMod, mouse_up, workspace, e-1
+```
+
+### Window Manipulation
+
+| Mouse Action | Result |
+|------------|--------|
+| `Super + Left Click + Drag` | Move window |
+| `Super + Right Click + Drag` | Resize window |
+
+```conf
+bindm = $mainMod, mouse:272, movewindow
+bindm = $mainMod, mouse:273, resizewindow
+```
+
+## Audio Controls
+
+Media keys for volume control:
+
+| Keybinding | Action |
+|------------|--------|
+| `XF86AudioRaiseVolume` | Increase volume by 5% |
+| `XF86AudioLowerVolume` | Decrease volume by 5% |
+| `XF86AudioMute` | Toggle mute |
+
+```conf
+bindel = , XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+
+bindel = , XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindel = , XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+```
+
+<Tip>
+  The `-l 1` flag limits volume to 100% to prevent audio distortion.
+</Tip>
+
+## Screenshots
+
+Take screenshots using Hyprshot and Satty:
+
+| Keybinding | Action |
+|------------|--------|
+| `Print` | Capture entire output, edit in Satty |
+| `Super + Print` | Select region, copy to clipboard |
+| `Super + F12` | Select region, edit in Satty |
+
+```conf
+# Full screen with editor
+bind = , Print, exec, hyprshot -m output --raw | satty --filename - --output-filename ~/Pictures/Screenshots/$(date '+%Y%m%d-%H%M%S').png
+
+# Region to clipboard
+bind = $mainMod, Print,  exec, hyprshot -m region --clipboard-only
+
+# Region with editor
+bind = $mainMod, F12, exec, hyprshot -m region --raw | satty --filename - --output-filename ~/Pictures/Screenshots/$(date '+%Y%m%d-%H%M%S').png --copy-command wl-copy
+```
+
+Screenshots are saved to `~/Pictures/Screenshots/` with timestamp filenames.
+
+## Customizing Keybindings
+
+To add or modify keybindings, edit `~/.config/hypr/modules/binds.conf`:
+
+```conf
+# Basic syntax
+bind = MODIFIERS, KEY, DISPATCHER, PARAMS
+
+# Examples
+bind = SUPER, B, exec, brave                    # Launch browser
+bind = SUPER SHIFT, X, exec, ~/.local/bin/script.sh  # Run script
+bind = SUPER, P, togglesplit,                   # Toggle split direction
+```
+
+### Common Dispatchers
+
+- `exec` - Execute a command
+- `killactive` - Close the active window
+- `workspace` - Switch to a workspace
+- `movetoworkspace` - Move window to workspace
+- `togglefloating` - Toggle floating/tiled mode
+- `fullscreen` - Toggle fullscreen
+- `movefocus` - Move focus (params: `l`, `r`, `u`, `d`)
+- `movewindow` - Move window in layout
+- `resizeactive` - Resize active window
+
+### Binding Types
+
+- `bind` - Standard one-time activation
+- `binde` - Repeats when held
+- `bindm` - Mouse binding
+- `bindel` - Repeats and works on lock screen
+
+For the complete list of dispatchers and binding options, see the [Hyprland documentation](https://wiki.hyprland.org/Configuring/Binds/).
+
+<Warning>
+  After modifying keybindings, reload the configuration with `Super + Shift + R`.
+</Warning>
+
+## Quick Reference Card
+
+### Most Used Keybindings
+
+```
+Programs:
+  Super + Return        Terminal
+  Super + Space         App Launcher
+  Super + E             File Manager
+
+Window:
+  Super + Q             Close
+  Super + V             Float
+  Super + F11           Fullscreen
+  Super + H/J/K/L       Move Focus
+  Ctrl + H/J/K/L        Resize
+
+Workspaces:
+  Super + [1-9,0]       Switch
+  Super + Tab           Scratchpad
+  Super + Scroll        Next/Prev
+
+System:
+  Super + Shift + R     Reload
+  Super + Shift + Q     Lock
+  Super + M             Logout Menu
+```
+
+## See Also
+
+- [Customization Guide](/guides/customization) - Change keybindings and modifiers
+- [Hyprland Binds Documentation](https://wiki.hyprland.org/Configuring/Binds/) - Official reference

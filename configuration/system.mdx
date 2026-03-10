@@ -1,0 +1,424 @@
+---
+title: System Configuration
+description: System-level configuration including environment variables, PATH setup, and AUR helper
+---
+
+## Environment Variables
+
+System environment variables are managed through systemd's `environment.d` directory.
+
+### Configuration Location
+
+```
+system/environment.d/
+├── envvarsuser.conf       # User environment variables
+├── rendering.conf         # Graphics rendering settings
+└── wayland.conf           # Wayland-specific variables
+```
+
+### User Environment Variables
+
+```conf envvarsuser.conf
+# XDG Base Directory Specification
+XDG_CONFIG_HOME=$HOME/.config
+XDG_CACHE_HOME=$HOME/.cache
+XDG_DATA_HOME=$HOME/.local/share
+XDG_STATE_HOME=$HOME/.local/state
+
+# ZSH configuration directory
+ZDOTDIR=$XDG_CONFIG_HOME/zsh
+
+# Default programs
+EDITOR=nvim
+VISUAL=nvim
+TERMINAL=kitty
+BROWSER=brave
+PAGER="less -R"
+
+# Less pager configuration
+LESS='-R --mouse --incsearch'
+LESSHISTFILE=$XDG_STATE_HOME/less/history
+
+# Development tools home directories
+CARGO_HOME=$XDG_DATA_HOME/cargo
+RUSTUP_HOME=$XDG_DATA_HOME/rustup
+GOPATH=$XDG_DATA_HOME/go
+GOBIN=$XDG_DATA_HOME/go/bin
+NPM_CONFIG_CACHE=$XDG_CACHE_HOME/npm
+NPM_CONFIG_PREFIX=$XDG_DATA_HOME/npm
+PYTHONUSERBASE=$XDG_DATA_HOME/python
+PYTHONPYCACHEPREFIX=$XDG_CACHE_HOME/python
+```
+
+<Info>
+  This configuration follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) to keep your home directory clean.
+</Info>
+
+### XDG Base Directories
+
+<AccordionGroup>
+  <Accordion title="XDG_CONFIG_HOME">
+    User-specific configuration files (`~/.config`)
+    
+    Applications store their config files here instead of cluttering `$HOME`
+  </Accordion>
+
+  <Accordion title="XDG_CACHE_HOME">
+    User-specific cache data (`~/.cache`)
+    
+    Temporary files that can be safely deleted
+  </Accordion>
+
+  <Accordion title="XDG_DATA_HOME">
+    User-specific data files (`~/.local/share`)
+    
+    Application data, logs, and persistent storage
+  </Accordion>
+
+  <Accordion title="XDG_STATE_HOME">
+    User-specific state data (`~/.local/state`)
+    
+    Logs, history files, and recently used files
+  </Accordion>
+</AccordionGroup>
+
+### Development Tools Configuration
+
+All development tools are configured to use XDG directories:
+
+<CardGroup cols={2}>
+  <Card title="Rust" icon="rust">
+    ```bash
+    CARGO_HOME=$XDG_DATA_HOME/cargo
+    RUSTUP_HOME=$XDG_DATA_HOME/rustup
+    ```
+  </Card>
+
+  <Card title="Go" icon="golang">
+    ```bash
+    GOPATH=$XDG_DATA_HOME/go
+    GOBIN=$XDG_DATA_HOME/go/bin
+    ```
+  </Card>
+
+  <Card title="Node.js" icon="node">
+    ```bash
+    NPM_CONFIG_CACHE=$XDG_CACHE_HOME/npm
+    NPM_CONFIG_PREFIX=$XDG_DATA_HOME/npm
+    ```
+  </Card>
+
+  <Card title="Python" icon="python">
+    ```bash
+    PYTHONUSERBASE=$XDG_DATA_HOME/python
+    PYTHONPYCACHEPREFIX=$XDG_CACHE_HOME/python
+    ```
+  </Card>
+</CardGroup>
+
+## PATH Configuration
+
+The PATH is configured in `home/zshenv` to ensure all user binaries are accessible:
+
+```zsh zshenv
+# Load systemd environment
+if [ -x /usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator ]; then
+    set -a
+    eval $(/usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator 2>/dev/null)
+    set +a
+fi
+
+# PATH configuration
+typeset -U path
+path=(
+    "$HOME/.local/bin"
+    "$CARGO_HOME/bin"
+    "$GOBIN"
+    "$NPM_CONFIG_PREFIX/bin"
+    "$PYTHONUSERBASE/bin"
+    "/usr/lib/ccache/bin"
+    $path
+)
+path=($^path(N/))        # Keep only existing directories
+export PATH
+```
+
+### PATH Priority Order
+
+<Steps>
+  <Step title="~/.local/bin">
+    User-installed binaries and scripts (highest priority)
+  </Step>
+
+  <Step title="Cargo bin">
+    Rust binaries installed via cargo
+  </Step>
+
+  <Step title="Go bin">
+    Go binaries installed via go install
+  </Step>
+
+  <Step title="NPM bin">
+    Node.js global packages
+  </Step>
+
+  <Step title="Python bin">
+    Python user packages (pip install --user)
+  </Step>
+
+  <Step title="ccache">
+    Compiler cache for faster compilation
+  </Step>
+
+  <Step title="System PATH">
+    System binaries (lowest priority)
+  </Step>
+</Steps>
+
+<Tip>
+  The `typeset -U path` command ensures the PATH only contains unique entries, preventing duplicates.
+</Tip>
+
+## Systemd User Environment
+
+### Loading Environment Variables
+
+The `zshenv` file loads systemd environment variables at shell startup:
+
+```zsh zshenv
+if [ -x /usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator ]; then
+    set -a
+    eval $(/usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator 2>/dev/null)
+    set +a
+fi
+```
+
+This ensures:
+- Environment variables from `~/.config/environment.d/*.conf` are loaded
+- Variables are available to systemd user services
+- Consistent environment across all applications
+
+<Info>
+  Systemd user services (like `hypridle.service`) can access these environment variables.
+</Info>
+
+## Paru Configuration
+
+Paru is the AUR helper used for package management.
+
+### Configuration File
+
+```conf paru.conf
+[options]
+PgpFetch              # Fetch PGP keys automatically
+Devel                 # Check -git packages for updates
+Provides              # Look for matching providers
+BottomUp              # Show AUR packages first
+SudoLoop              # Keep sudo timestamp alive
+RemoveMake            # Remove makedeps after install
+CleanAfter            # Clean build directory after install
+CombinedUpgrade       # Upgrade both repos and AUR in one go
+BatchInstall          # Install multiple packages in one batch
+UpgradeMenu           # Show menu to select packages to upgrade
+NewsOnUpgrade         # Show Arch news before upgrading
+SaveChanges           # Save package changes
+SkipReview            # Skip PKGBUILD review (use with caution)
+
+DevelSuffixes = -git -cvs -svn -bzr -darcs -always -hg -fossil
+SortBy = votes
+SearchBy = name-desc
+CompletionInterval = 7
+
+[bin]
+FileManager = yazi    # File manager for package files
+Bat = bat             # Syntax highlighting for PKGBUILDs
+```
+
+### Key Features
+
+<CardGroup cols={2}>
+  <Card title="Automatic Updates" icon="rotate">
+    Checks -git packages for updates automatically
+  </Card>
+
+  <Card title="Clean Builds" icon="broom">
+    Removes build dependencies and cleans up after install
+  </Card>
+
+  <Card title="Batch Operations" icon="layer-group">
+    Install multiple packages efficiently
+  </Card>
+
+  <Card title="Arch News" icon="newspaper">
+    Shows important news before system upgrades
+  </Card>
+</CardGroup>
+
+### Paru Usage Examples
+
+```bash
+# Update system (repo + AUR packages)
+paru
+
+# Search for packages
+paru <package-name>
+
+# Install package
+paru -S <package-name>
+
+# Remove package
+paru -R <package-name>
+
+# Clean cache
+paru -Sc
+
+# Show package info
+paru -Si <package-name>
+```
+
+<Warning>
+  The `SkipReview` option is enabled for convenience but means you won't review PKGBUILDs before installation. Consider disabling this if security is a concern.
+</Warning>
+
+## Less Pager Configuration
+
+Custom colors for the less pager (man pages):
+
+```zsh zshenv
+# Less pager colors
+export LESS_TERMCAP_mb=$'\e[1;31m'      # Begin blinking
+export LESS_TERMCAP_md=$'\e[1;36m'      # Begin bold (cyan)
+export LESS_TERMCAP_me=$'\e[0m'         # End mode
+export LESS_TERMCAP_se=$'\e[0m'         # End standout
+export LESS_TERMCAP_so=$'\e[30;43m'     # Begin standout (yellow bg)
+export LESS_TERMCAP_ue=$'\e[0m'         # End underline
+export LESS_TERMCAP_us=$'\e[4;32m'      # Begin underline (green)
+```
+
+Result: Colorful, readable man pages instead of plain text.
+
+## Directory Structure
+
+### XDG-Compliant Layout
+
+With this configuration, your home directory stays clean:
+
+```
+$HOME/
+├── .config/              # XDG_CONFIG_HOME
+│   ├── hypr/
+│   ├── nvim/
+│   ├── zsh/
+│   ├── environment.d/
+│   └── ...
+├── .cache/               # XDG_CACHE_HOME
+│   ├── npm/
+│   ├── python/
+│   └── zsh/
+├── .local/
+│   ├── bin/              # User binaries
+│   ├── share/            # XDG_DATA_HOME
+│   │   ├── cargo/
+│   │   ├── go/
+│   │   ├── npm/
+│   │   └── python/
+│   └── state/            # XDG_STATE_HOME
+│       └── less/
+└── .zshenv               # Only file in $HOME root
+```
+
+<Tip>
+  Following XDG standards makes backing up and restoring your configuration much easier.
+</Tip>
+
+## Modifying System Configuration
+
+<Steps>
+  <Step title="Edit Environment Variables">
+    ```bash
+    nvim ~/dotfiles/system/environment.d/envvarsuser.conf
+    ```
+  </Step>
+
+  <Step title="Reload Environment">
+    ```bash
+    # Reload shell
+    exec zsh
+    
+    # Or log out and back in
+    ```
+  </Step>
+
+  <Step title="Verify Changes">
+    ```bash
+    # Check specific variable
+    echo $VARIABLE_NAME
+    
+    # Check PATH
+    echo $PATH | tr ':' '\n'
+    ```
+  </Step>
+
+  <Step title="Commit Changes">
+    ```bash
+    cd ~/dotfiles
+    git add system/environment.d/
+    git commit -m "Update environment variables"
+    ```
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Environment variables not loaded">
+    Ensure systemd user environment generator is executable:
+    
+    ```bash
+    ls -l /usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator
+    ```
+    
+    Reload shell: `exec zsh`
+  </Accordion>
+
+  <Accordion title="PATH not updated">
+    Check that `~/.zshenv` is being loaded:
+    
+    ```bash
+    echo $ZDOTDIR
+    # Should output: /home/username/.config/zsh
+    ```
+    
+    Verify PATH in zshenv is correct
+  </Accordion>
+
+  <Accordion title="Paru not finding packages">
+    Update package databases:
+    
+    ```bash
+    paru -Sy
+    ```
+    
+    Check network connectivity and AUR availability
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Shell Configuration" icon="terminal" href="/configuration/shell">
+    Customize your Zsh experience
+  </Card>
+
+  <Card title="Application Configs" icon="gear" href="/configuration/applications">
+    Configure individual applications
+  </Card>
+
+  <Card title="Hyprland Setup" icon="window" href="/configuration/hyprland">
+    Window manager configuration
+  </Card>
+
+  <Card title="Overview" icon="book" href="/configuration/overview">
+    Configuration structure overview
+  </Card>
+</CardGroup>

@@ -1,0 +1,183 @@
+---
+title: Package List
+description: Complete list of all packages installed by the dotfiles
+icon: box
+---
+
+## Overview
+
+This page lists all packages defined in `packages.txt` and installed automatically by the dotfiles installation script. The installation uses [Paru](https://github.com/Morganamilo/paru), an AUR helper that handles both official repository and AUR packages.
+
+<Note>
+Packages are installed automatically when you run `./install`. The script only installs missing packages, so re-running is safe.
+</Note>
+
+## Terminal Tools
+
+Modern CLI utilities that enhance the terminal experience.
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `bat` | Official | Modern `cat` replacement with syntax highlighting |
+| `eza` | Official | Modern `ls` replacement with colors and icons |
+| `fastfetch` | Official | Fast system information tool (neofetch alternative) |
+| `btop` | Official | Resource monitor with beautiful TUI |
+| `yazi` | Official | Terminal file manager with image preview |
+| `lazygit` | Official | Terminal UI for git commands |
+| `zsh` | Official | Z shell - powerful shell alternative |
+| `zsh-antidote` | Official | Fast ZSH plugin manager |
+| `neovim` | Official | Hyperextensible Vim-based text editor |
+
+## Window Manager & Wayland
+
+Hyprland compositor and essential Wayland utilities.
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `hyprland` | Official | Dynamic tiling Wayland compositor |
+| `hypridle` | Official | Idle daemon for Hyprland |
+| `hyprlock` | Official | Screen locker for Hyprland |
+| `hyprshot` | Official | Screenshot utility for Hyprland |
+| `xdg-desktop-portal-hyprland` | Official | Desktop portal implementation for Hyprland |
+| `xdg-user-dirs` | Official | Manage user directories (Documents, Downloads, etc.) |
+| `qt6-wayland` | Official | Qt6 Wayland support |
+
+## User Interface
+
+Status bars, launchers, and UI components.
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `waybar` | Official | Highly customizable Wayland bar |
+| `rofi` | Official | Application launcher and dmenu replacement |
+| `wlogout` | Official | Logout menu for Wayland |
+| `swaync` | Official | Notification daemon for Sway/Hyprland |
+| `awww-bin` | AUR | Wallpaper manager for Wayland |
+
+## Utilities & System
+
+System utilities and essential tools.
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `kitty` | Official | GPU-accelerated terminal emulator |
+| `brightnessctl` | Official | Brightness control utility |
+| `pavucontrol` | Official | PulseAudio volume control |
+| `polkit-gnome` | Official | Polkit authentication agent |
+| `wl-clipboard` | Official | Wayland clipboard utilities |
+| `jq` | Official | JSON processor for command line |
+
+## Screenshot & Image Tools
+
+Tools for capturing and viewing images.
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `grim` | Official | Screenshot utility for Wayland |
+| `slurp` | Official | Select a region in Wayland |
+| `satty` | Official | Screenshot annotation tool |
+| `imv` | Official | Image viewer for Wayland |
+
+## Fonts
+
+Complete font collection for various languages and symbols.
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `noto-fonts` | Official | Google's Noto font family |
+| `noto-fonts-cjk` | Official | Chinese, Japanese, Korean fonts |
+| `noto-fonts-emoji` | Official | Emoji font support |
+| `noto-fonts-extra` | Official | Additional Noto fonts |
+| `ttf-bitstream-vera` | Official | Bitstream Vera fonts |
+| `ttf-dejavu` | Official | DejaVu font family |
+| `ttf-jetbrains-mono-nerd` | Official | JetBrains Mono with Nerd Font icons |
+| `ttf-liberation` | Official | Liberation fonts (Arial/Times/Courier alternatives) |
+| `ttf-opensans` | Official | Open Sans font family |
+| `inter-font` | Official | Inter font family |
+
+## Themes & Icons
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `papirus-icon-theme` | Official | Papirus icon theme |
+| `bibata-cursor-theme-bin` | AUR | Bibata cursor theme |
+
+## Web Browser
+
+| Package | Type | Description |
+|---------|------|-------------|
+| `brave-bin` | AUR | Brave web browser (privacy-focused) |
+
+## Package Summary
+
+<CardGroup cols={2}>
+  <Card title="Total Packages" icon="box">
+    44 packages
+  </Card>
+  <Card title="Official Repos" icon="shield-check">
+    41 packages
+  </Card>
+  <Card title="AUR Packages" icon="download">
+    3 packages
+  </Card>
+  <Card title="Font Packages" icon="font">
+    10 packages
+  </Card>
+</CardGroup>
+
+## AUR Packages
+
+These packages are installed from the Arch User Repository:
+
+- **bibata-cursor-theme-bin** - Pre-built Bibata cursor theme
+- **brave-bin** - Pre-built Brave browser binary
+- **awww-bin** - Wallpaper manager for Wayland
+
+## Installation
+
+All packages are installed automatically when you run:
+
+```bash
+./install
+```
+
+The installation script compares `packages.txt` with installed packages and only installs what's missing:
+
+```bash
+missing=$(comm -23 <(sort packages.txt) <(pacman -Qq | sort))
+if [ -n "$missing" ]; then
+  paru -S --needed --noconfirm $missing
+fi
+```
+
+<Tip>
+You can safely re-run the installer. It won't reinstall packages that are already present on your system.
+</Tip>
+
+## Package Categories
+
+- **Terminal Tools** (9) - CLI utilities for better terminal workflow
+- **Window Manager** (7) - Hyprland and Wayland infrastructure
+- **User Interface** (5) - Bars, launchers, notifications
+- **Utilities** (6) - System utilities and essential tools
+- **Screenshot Tools** (4) - Image capture and viewing
+- **Fonts** (10) - Comprehensive font coverage
+- **Themes** (2) - Icons and cursors
+- **Browser** (1) - Web browser
+
+## Managing Packages
+
+To add a new package to the dotfiles:
+
+1. Add the package name to `packages.txt`
+2. Run `./install` to install it
+3. Commit the updated `packages.txt`
+
+To remove a package:
+
+1. Remove it from `packages.txt`
+2. Manually uninstall with `paru -Rns <package>`
+
+<Warning>
+Removing a package from `packages.txt` doesn't automatically uninstall it. You need to manually remove it with Paru/Pacman.
+</Warning>

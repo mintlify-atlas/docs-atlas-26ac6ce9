@@ -1,0 +1,429 @@
+---
+title: Application Configurations
+description: Configuration details for Neovim, Kitty, VS Code, and other applications
+---
+
+## Neovim
+
+Neovim configuration using LazyVim as a base with custom settings.
+
+### Configuration Structure
+
+```
+dots/nvim/
+├── init.lua                   # Entry point
+└── lua/
+    ├── config/
+    │   ├── lazy.lua          # Plugin manager setup
+    │   ├── options.lua       # Editor options
+    │   └── keymaps.lua       # Keybindings
+    └── plugins/              # Plugin configurations
+```
+
+### Entry Point
+
+```lua init.lua
+-- Globals
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
+
+-- Bootstrap lazy.nvim, LazyVim and your plugins
+require("config.lazy")
+require("config.options")
+require("config.keymaps")
+```
+
+### Editor Options
+
+Key settings from `lua/config/options.lua`:
+
+```lua options.lua
+local opt = vim.opt
+
+-- Indentation
+opt.expandtab = true
+opt.shiftwidth = 2
+opt.tabstop = 2
+opt.smartindent = true
+
+-- Display
+opt.number = true
+opt.relativenumber = false
+opt.signcolumn = "yes"
+opt.wrap = false
+
+-- Search
+opt.ignorecase = true
+opt.smartcase = true
+opt.hlsearch = true
+
+-- Behavior
+opt.mouse = "a"
+opt.clipboard = "unnamedplus"    # System clipboard
+opt.undofile = true
+opt.undolevels = 10000
+
+-- Performance
+opt.updatetime = 200
+opt.timeoutlen = 300
+
+-- Splits
+opt.splitbelow = true
+opt.splitright = true
+```
+
+### Autocmds
+
+Automatic behaviors configured in `options.lua`:
+
+<AccordionGroup>
+  <Accordion title="Auto-save on Insert Exit">
+    ```lua
+    vim.api.nvim_create_autocmd("InsertLeave", {
+      callback = function()
+        if vim.bo.modifiable and vim.bo.buftype == "" then
+          vim.cmd("silent! w")
+        end
+      end,
+    })
+    ```
+  </Accordion>
+
+  <Accordion title="Highlight on Yank">
+    ```lua
+    vim.api.nvim_create_autocmd("TextYankPost", {
+      callback = function()
+        vim.highlight.on_yank({ higroup = "Visual", timeout = 200 })
+      end,
+    })
+    ```
+  </Accordion>
+
+  <Accordion title="Remove Trailing Whitespace">
+    ```lua
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      callback = function()
+        vim.cmd([[%s/\\s\\+$//e]])
+      end,
+    })
+    ```
+  </Accordion>
+
+  <Accordion title="Restore Cursor Position">
+    ```lua
+    vim.api.nvim_create_autocmd("BufReadPost", {
+      callback = function()
+        local line = vim.fn.line("'\"")
+        if line > 1 and line <= vim.fn.line("$") then
+          vim.cmd('exe "normal! g\'\\""')
+        end
+      end,
+    })
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Kitty Terminal
+
+Highly customizable GPU-accelerated terminal emulator.
+
+### Main Configuration
+
+```conf kitty.conf
+# Include theme and keybindings
+include ./theme.conf
+include ./keybindings.conf
+
+# Font configuration
+font_family      JetBrainsMono Nerd Font Mono
+bold_font        JetBrainsMono Nerd Font Mono Bold
+italic_font      JetBrainsMono Nerd Font Mono Italic
+font_size        13.0
+line_height      1.2
+
+# Font features (ligatures)
+disable_ligatures never
+font_features JetBrainsMonoNFM-Regular +zero +ss01 +cv14
+
+# Window appearance
+background_opacity    0.50
+background_blur       1
+
+window_border_width  0
+window_margin_width  0
+window_padding_width 12
+window_padding_height 4
+
+# Tab bar
+tab_bar_edge            top
+tab_bar_style           fade
+tab_powerline_style     slanted
+tab_title_template      "{fmt.fg.red}{activity_symbol}{fmt.fg.tab}{index}:{title}"
+
+# Cursor
+cursor_shape               beam
+cursor_beam_thickness      2.0
+cursor_blink_interval      0.5
+
+# Performance
+repaint_delay   5
+input_delay     1
+sync_to_monitor yes
+
+# Scrollback
+scrollback_lines 50000
+
+# Shell
+shell zsh
+```
+
+<Tip>
+  Kitty's GPU acceleration and advanced features make it ideal for development work and terminal-heavy workflows.
+</Tip>
+
+### Key Features
+
+<CardGroup cols={2}>
+  <Card title="50% Transparency" icon="eye">
+    Background opacity set to 0.50 with blur for aesthetics
+  </Card>
+
+  <Card title="Ligatures Enabled" icon="font">
+    Programming ligatures for better code readability
+  </Card>
+
+  <Card title="50K Scrollback" icon="scroll">
+    Massive scrollback buffer for reviewing output
+  </Card>
+
+  <Card title="GPU Accelerated" icon="microchip">
+    Hardware acceleration for smooth rendering
+  </Card>
+</CardGroup>
+
+## VS Code
+
+Configuration focused on aesthetics and productivity.
+
+### Theme & Appearance
+
+```json settings.json
+{
+  "workbench.colorTheme": "Tokyo Night Storm",
+  "workbench.productIconTheme": "fluent-icons",
+  "workbench.iconTheme": "symbols",
+  "workbench.activityBar.location": "top",
+  "workbench.sideBar.location": "right",
+  "window.titleBarStyle": "custom"
+}
+```
+
+### Editor Settings
+
+```json settings.json
+{
+  "editor.fontFamily": "'JetBrains Mono Nerd Font', monospace",
+  "editor.fontWeight": "bold",
+  "editor.fontSize": 14,
+  "editor.fontLigatures": true,
+  "editor.lineHeight": 1.4,
+  
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.tabSize": 2,
+  
+  "editor.minimap.enabled": false,
+  "editor.cursorBlinking": "expand",
+  "editor.cursorSmoothCaretAnimation": "on",
+  
+  "editor.bracketPairColorization.enabled": true,
+  "editor.stickyScroll.enabled": true
+}
+```
+
+### File Management
+
+```json settings.json
+{
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.next": true
+  }
+}
+```
+
+### Terminal Integration
+
+```json settings.json
+{
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "terminal.integrated.fontFamily": "'Hack Nerd Font Mono', monospace",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.gpuAcceleration": "on"
+}
+```
+
+### Git Configuration
+
+```json settings.json
+{
+  "git.enableSmartCommit": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.postCommitCommand": "sync",
+  "scm.diffDecorations": "all"
+}
+```
+
+## Fastfetch
+
+System information tool for displaying system specs.
+
+### Location
+
+```
+dots/fastfetch/
+├── config.jsonc           # Main configuration
+└── ascii.txt              # Custom ASCII art
+```
+
+<Info>
+  Fastfetch is a faster alternative to neofetch written in C, optimized for performance.
+</Info>
+
+## Waybar
+
+Wayland status bar for Hyprland.
+
+### Configuration Files
+
+```
+hyprland/waybar/
+├── config.jsonc           # Bar modules and layout
+└── style.css              # Styling and colors
+```
+
+### Features
+
+- Workspace indicators
+- System tray
+- Clock and calendar
+- Network status
+- Audio volume
+- CPU/Memory usage
+- Custom modules
+
+<Tip>
+  Waybar is highly customizable via CSS and supports custom scripts for additional functionality.
+</Tip>
+
+## Rofi
+
+Application launcher and window switcher.
+
+### Configuration
+
+```
+hyprland/rofi/
+└── config.rasi            # Theme and behavior
+```
+
+### Usage
+
+- **Super + D**: Launch rofi in drun mode (application launcher)
+- **Super + Tab**: Window switcher
+- Fuzzy search for quick application access
+
+## Mako
+
+Lightweight notification daemon for Wayland.
+
+### Configuration
+
+```conf config
+# Notification appearance and behavior
+# Located at: hyprland/mako/config
+```
+
+### Features
+
+- Custom styling
+- Notification grouping
+- Action support
+- History management
+
+## Bat
+
+Cat replacement with syntax highlighting.
+
+### Configuration
+
+```
+dots/bat/
+└── config               # Bat settings
+```
+
+### Usage in Aliases
+
+```bash
+alias bat='bat --style=plain'
+alias bcat='bat --style=full'     # Full decorations
+```
+
+## Application Locations Quick Reference
+
+<CardGroup cols={2}>
+  <Card title="Neovim" icon="file-code">
+    `dots/nvim/`
+  </Card>
+
+  <Card title="Kitty" icon="terminal">
+    `dots/kitty/`
+  </Card>
+
+  <Card title="VS Code" icon="window">
+    `dots/code/settings.json`
+  </Card>
+
+  <Card title="Fastfetch" icon="gauge">
+    `dots/fastfetch/`
+  </Card>
+
+  <Card title="Waybar" icon="chart-bar">
+    `hyprland/waybar/`
+  </Card>
+
+  <Card title="Rofi" icon="search">
+    `hyprland/rofi/`
+  </Card>
+
+  <Card title="Mako" icon="bell">
+    `hyprland/mako/`
+  </Card>
+
+  <Card title="Bat" icon="cat">
+    `dots/bat/`
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Shell Configuration" icon="terminal" href="/configuration/shell">
+    Customize Zsh aliases and functions
+  </Card>
+
+  <Card title="Hyprland Setup" icon="window" href="/configuration/hyprland">
+    Configure window manager behavior
+  </Card>
+</CardGroup>

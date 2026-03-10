@@ -1,0 +1,400 @@
+---
+title: 'Launcher'
+description: 'Rofi - A fast application launcher and window switcher'
+icon: 'rocket-launch'
+---
+
+## Rofi Application Launcher
+
+Rofi is a fast, customizable application launcher and window switcher for X11 and Wayland. This configuration provides a clean, minimal interface for launching applications and switching between windows.
+
+## Configuration
+
+Rofi is configured using `config.rasi` located in `~/.config/rofi/`.
+
+### Basic Settings
+
+```rasi
+configuration {
+    modi:         "drun";
+    show-icons:   true;
+    display-drun: "";
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Mode" icon="list">
+    `drun` - Desktop application launcher
+  </Card>
+  
+  <Card title="Icons" icon="icons">
+    Application icons are displayed
+  </Card>
+</CardGroup>
+
+## Theme Configuration
+
+### Window Appearance
+
+```rasi
+window {
+    transparency:     "real";
+    width:            450px;
+    border-radius:    8px;
+    background-color: #000000CC;
+    border:           2px solid;
+    border-color:     #FFFFFFFF;
+    padding:          12px;
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Window Properties">
+    | Property | Value | Description |
+    |----------|-------|-------------|
+    | Width | 450px | Fixed width for consistency |
+    | Border Radius | 8px | Rounded corners |
+    | Background | #000000CC | Semi-transparent black |
+    | Border | 2px white | Clean white border |
+    | Padding | 12px | Internal spacing |
+  </Accordion>
+</AccordionGroup>
+
+### Layout Structure
+
+```rasi
+mainbox {
+    spacing:  10px;
+    margin:   0px;
+    padding:  8px;
+    children: ["inputbar", "listview", "message"];
+}
+```
+
+The main container includes:
+- **Input bar**: Search field and prompt
+- **List view**: Application results
+- **Message**: Error/info messages
+
+## Input Bar
+
+Search input with prompt:
+
+```rasi
+inputbar {
+    children: ["prompt", "entry"];
+    spacing:  10px;
+}
+
+prompt {
+    text-color: #FFFFFFFF;
+}
+
+entry {
+    placeholder:       "Search Apps";
+    text-color:        #FFFFFFFF;
+    placeholder-color: #888888FF;
+    cursor:            text;
+}
+```
+
+<Note>
+  The search is instant and fuzzy - start typing to filter applications immediately.
+</Note>
+
+## List View
+
+Results are displayed in a scrollable list:
+
+```rasi
+listview {
+    columns:       1;
+    lines:         7;
+    fixed-height:  true;
+    fixed-columns: true;
+    cycle:         false;
+    scrollbar:     false;
+    border:        0px solid;
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Single Column" icon="bars">
+    One application per line
+  </Card>
+  
+  <Card title="7 Visible Items" icon="list-ol">
+    Shows 7 items at once
+  </Card>
+  
+  <Card title="No Cycling" icon="arrows-rotate">
+    List doesn't wrap around
+  </Card>
+  
+  <Card title="No Scrollbar" icon="scrollbar">
+    Clean minimal interface
+  </Card>
+</CardGroup>
+
+## Element Styling
+
+### Normal Elements
+
+```rasi
+element {
+    spacing:          10px;
+    margin:           0px;
+    padding:          8px;
+    border-radius:    8px;
+    background-color: transparent;
+    text-color:       #FFFFFFFF;
+    children:         ["element-icon", "element-text"];
+    cursor:           pointer;
+}
+
+element normal.normal {
+    background-color: transparent;
+    text-color:       #FFFFFFFF;
+}
+
+element alternate.normal {
+    background-color: #111111FF;
+    text-color:       #FFFFFFFF;
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Element States">
+    | State | Background | Description |
+    |-------|------------|-------------|
+    | Normal | Transparent | Standard list items |
+    | Alternate | Dark gray | Zebra striping |
+    | Selected | White | Currently highlighted |
+  </Accordion>
+</AccordionGroup>
+
+### Selected Elements
+
+```rasi
+element selected.normal,
+element selected.active {
+    background-color: #FFFFFFFF;
+    text-color:       #000000FF;
+}
+```
+
+Selected items have inverted colors (white background, black text) for high contrast.
+
+### Element Components
+
+```rasi
+element-icon {
+    background-color: inherit;
+    size:             1.2em;
+}
+
+element-text {
+    background-color: inherit;
+    text-color:       inherit;
+    cursor:           inherit;
+}
+```
+
+Icons are 1.2em (relative to font size) and inherit the parent element's styling.
+
+## Color Scheme
+
+The configuration uses a minimal monochrome palette:
+
+```rasi
+* {
+    font:           "Figtree 13";
+    b-color:        #000000FF;  /* Black */
+    fg-color:       #FFFFFFFF;  /* White */
+    fgp-color:      #888888FF;  /* Gray (placeholder) */
+    b-radius:       8px;
+    hl-color:       #FFFFFFFF;  /* Highlight - White */
+    hlt-color:      #000000FF;  /* Highlight text - Black */
+    alt-color:      #111111FF;  /* Alternate - Dark gray */
+    wbg-color:      #000000CC;  /* Window bg - Semi-transparent */
+    w-border:       2px solid;
+    w-border-color: #FFFFFFFF;  /* White border */
+}
+```
+
+<Tip>
+  Customize colors by changing the hex values in the variables section at the top of `config.rasi`.
+</Tip>
+
+## Usage and Shortcuts
+
+### Opening Rofi
+
+<CodeGroup>
+```bash From Terminal
+rofi -show drun
+```
+
+```bash Hyprland Keybind
+Super + Space
+```
+
+```bash From Waybar
+# Click the launcher icon (󰣇)
+```
+</CodeGroup>
+
+### Navigation
+
+<AccordionGroup>
+  <Accordion title="Keyboard Navigation">
+    | Key | Action |
+    |-----|--------|
+    | `Type` | Filter applications |
+    | `↑` / `↓` | Navigate list |
+    | `Enter` | Launch selected app |
+    | `Escape` | Close Rofi |
+    | `Tab` | Auto-complete |
+  </Accordion>
+
+  <Accordion title="Mouse Navigation">
+    | Action | Result |
+    |--------|--------|
+    | `Hover` | Highlight item |
+    | `Click` | Launch application |
+    | `Scroll` | Navigate list |
+  </Accordion>
+</AccordionGroup>
+
+## Available Modes
+
+While configured for `drun`, Rofi supports multiple modes:
+
+<CardGroup cols={2}>
+  <Card title="drun" icon="grid">
+    Desktop applications (.desktop files)
+  </Card>
+  
+  <Card title="run" icon="terminal">
+    Execute commands from PATH
+  </Card>
+  
+  <Card title="window" icon="window-restore">
+    Switch between open windows
+  </Card>
+  
+  <Card title="ssh" icon="server">
+    Quick SSH connections
+  </Card>
+</CardGroup>
+
+Switch modes by adding to the configuration:
+
+```rasi
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+}
+```
+
+Then use `Super + Tab` or arrow keys to cycle modes when Rofi is open.
+
+## Customization
+
+### Changing Font
+
+```rasi
+* {
+    font: "Your Font Name 13";
+}
+```
+
+Popular alternatives:
+- `"JetBrainsMono Nerd Font 12"`
+- `"Ubuntu 13"`
+- `"Roboto 12"`
+
+### Adjusting Size
+
+```rasi
+window {
+    width: 600px;  /* Wider window */
+}
+
+listview {
+    lines: 10;     /* Show more items */
+}
+```
+
+### Adding Transparency
+
+```rasi
+window {
+    background-color: #000000AA;  /* More transparent */
+}
+```
+
+Transparency format: `#RRGGBBAA` where `AA` is alpha (00-FF).
+
+### Color Themes
+
+Quick theme example - Catppuccin style:
+
+```rasi
+* {
+    bg-color:       #1e1e2e;
+    fg-color:       #cdd6f4;
+    hl-color:       #cba6f7;
+    border-color:   #89b4fa;
+}
+```
+
+## Performance
+
+<CardGroup cols={2}>
+  <Card title="Fast Launch" icon="bolt">
+    Rofi starts in milliseconds
+  </Card>
+  
+  <Card title="Instant Search" icon="magnifying-glass">
+    Real-time filtering as you type
+  </Card>
+  
+  <Card title="Low Memory" icon="memory">
+    Minimal resource footprint
+  </Card>
+  
+  <Card title="Wayland Native" icon="display">
+    Full Wayland support with `-show drun`
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Icons Not Showing">
+    Ensure `show-icons: true` is set and you have an icon theme installed:
+    ```bash
+    sudo pacman -S papirus-icon-theme
+    ```
+  </Accordion>
+
+  <Accordion title="Applications Missing">
+    Rofi reads `.desktop` files from:
+    - `/usr/share/applications/`
+    - `~/.local/share/applications/`
+    
+    Ensure applications have valid desktop entries.
+  </Accordion>
+
+  <Accordion title="Theme Not Loading">
+    Check syntax errors in `config.rasi`:
+    ```bash
+    rofi -dump-config
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  Rofi requires properly formatted `.desktop` files. Applications installed from source may need manual desktop file creation.
+</Warning>

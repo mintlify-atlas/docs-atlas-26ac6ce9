@@ -1,0 +1,240 @@
+---
+title: Repository Structure
+description: Complete directory tree and file organization of the dotfiles repository
+icon: folder-tree
+---
+
+## Overview
+
+This dotfiles repository uses [Dotbot](https://github.com/anishathalye/dotbot) for automated installation and symlink management. The structure is organized into four main directories, each serving a specific purpose.
+
+## Directory Tree
+
+```
+.
+├── dotbot/                 # Dotbot submodule for installation
+├── dots/                   # Application-specific configurations
+│   ├── bat/               # bat (cat alternative) config
+│   ├── code/              # VS Code settings
+│   ├── fastfetch/         # System info tool config
+│   ├── kitty/             # Kitty terminal emulator
+│   └── nvim/              # Neovim configuration
+├── home/                   # Files that go directly in $HOME
+│   └── zshenv             # ZSH environment variables
+├── hyprland/              # Hyprland window manager configs
+│   ├── hypr/              # Main Hyprland configuration
+│   │   ├── modules/       # Modular config files
+│   │   ├── hypridle.conf  # Idle daemon config
+│   │   ├── hyprland.conf  # Main entry point
+│   │   └── hyprlock.conf  # Lock screen config
+│   ├── mako/              # Notification daemon
+│   ├── rofi/              # Application launcher
+│   ├── waybar/            # Status bar
+│   └── wlogout/           # Logout menu
+├── system/                # System-wide configurations
+│   ├── environment.d/     # systemd environment variables
+│   ├── paru/              # AUR helper config
+│   └── zsh/               # ZSH shell configuration
+├── install*               # Installation script
+├── install.conf.yaml      # Dotbot configuration
+└── packages.txt           # List of packages to install
+```
+
+## Main Directories
+
+### home/
+
+Contains files that are symlinked directly to your home directory (`~`).
+
+- **zshenv** - ZSH environment file loaded first, sets up XDG directories and PATH
+
+### dots/
+
+Application-specific configuration files that go in `~/.config/`.
+
+| Directory | Description | Symlinked to |
+|-----------|-------------|-------------|
+| `bat/` | bat (modern cat) syntax highlighting themes | `~/.config/bat/` |
+| `code/` | Visual Studio Code user settings | `~/.config/Code/User/` |
+| `fastfetch/` | System information display tool | `~/.config/fastfetch/` |
+| `kitty/` | Kitty terminal emulator configuration | `~/.config/kitty/` |
+| `nvim/` | Neovim editor configuration with Lua | `~/.config/nvim/` |
+
+### hyprland/
+
+All Hyprland window manager and Wayland-related configurations.
+
+| Directory | Description | Symlinked to |
+|-----------|-------------|-------------|
+| `hypr/` | Main Hyprland configuration with modular setup | `~/.config/hypr/` |
+| `waybar/` | Status bar configuration and styling | `~/.config/waybar/` |
+| `mako/` | Notification daemon configuration | `~/.config/mako/` |
+| `wlogout/` | Logout menu with custom icons | `~/.config/wlogout/` |
+| `rofi/` | Application launcher theming | `~/.config/rofi/` |
+
+#### Hyprland Modules
+
+The `hyprland/hypr/modules/` directory contains modular configuration files:
+
+| File | Purpose |
+|------|--------|
+| `vars.conf` | Application and color variable definitions |
+| `env.conf` | Hyprland-specific environment variables |
+| `general.conf` | General Hyprland settings (gaps, borders, etc.) |
+| `theme.conf` | Visual theming (decorations, animations) |
+| `input.conf` | Keyboard and mouse input settings |
+| `layout.conf` | Window layout configuration |
+| `monitors.conf` | Monitor configuration |
+| `binds.conf` | Keyboard shortcuts and keybindings |
+| `windowrules.conf` | Per-application window rules |
+| `autostart.conf` | Programs to launch on startup |
+
+### system/
+
+System-level configurations that affect the entire shell and environment.
+
+| Directory | Description | Symlinked to |
+|-----------|-------------|-------------|
+| `environment.d/` | systemd user environment variables | `~/.config/environment.d/` |
+| `paru/` | Paru AUR helper configuration | `~/.config/paru/` |
+| `zsh/` | ZSH shell configuration and plugins | `~/.config/zsh/` |
+
+#### environment.d Files
+
+| File | Purpose |
+|------|--------|
+| `envvarsuser.conf` | XDG directories, default programs, development tools |
+| `rendering.conf` | Font rendering and NVIDIA hardware acceleration |
+| `wayland.conf` | Wayland-specific environment variables |
+
+#### ZSH Configuration Files
+
+| File | Purpose |
+|------|--------|
+| `.zshrc` | Main ZSH configuration file |
+| `.zprofile` | Profile settings loaded on login |
+| `.zsh_plugins.txt` | Antidote plugin manager plugin list |
+| `aliases.zsh` | Shell aliases for common commands |
+| `git.zsh` | Git-specific aliases and functions |
+| `pacman.zsh` | Pacman/Paru package manager aliases |
+| `functions.zsh` | Custom shell functions |
+| `keybinds.zsh` | ZSH keybindings |
+
+## Installation Files
+
+### install
+
+Bash script that bootstraps the Dotbot installation process:
+
+```bash ~/workspace/source/install
+#!/usr/bin/env bash
+
+set -e
+
+CONFIG="install.conf.yaml"
+DOTBOT_DIR="dotbot"
+
+DOTBOT_BIN="bin/dotbot"
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+cd "${BASEDIR}"
+git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
+git submodule update --init --recursive "${DOTBOT_DIR}"
+
+"${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" -c "${CONFIG}" "${@}"
+```
+
+**Usage:** `./install`
+
+### install.conf.yaml
+
+Dotbot configuration that defines:
+
+1. **Package installation** - Installs packages from `packages.txt` using Paru
+2. **Directory creation** - Creates necessary cache and data directories
+3. **Symlink management** - Links all config files to their proper locations
+4. **Cleanup** - Removes broken symlinks
+
+<Accordion title="View install.conf.yaml">
+```yaml
+- defaults:
+    link:
+      relink: true
+      create: true
+      relative: true
+      force: false
+
+- clean:
+    '~':
+      recursive: false
+    '~/.local/bin':
+      recursive: true
+    '~/.config':
+      recursive: true
+
+- shell:
+    - command: |
+        missing=$(comm -23 <(sort packages.txt) <(pacman -Qq | sort))
+        if [ -n "$missing" ]; then
+          echo -e "\e[33mInstalling missing packages:\e[0m $missing"
+          paru -S --needed --noconfirm $missing
+        else
+          echo -e "\e[32mSystem up to date\e[0m"
+        fi
+      description: Instaling packages
+
+- create:
+    - ~/.cache/zsh
+    - ~/.local/share/zsh
+
+- link:
+    # Home
+    ~/.zshenv:
+      path: home/zshenv
+
+    # Dots
+    ~/.config/Code/User/settings.json:
+        path: dots/code/settings.json
+    ~/.config/nvim:
+      path: dots/nvim
+    ~/.config/kitty:
+        path: dots/kitty
+    ~/.config/fastfetch:
+        path: dots/fastfetch
+
+    # Hyprland
+    ~/.config/hypr:
+        path: hyprland/hypr
+    ~/.config/waybar:
+        path: hyprland/waybar
+    ~/.config/mako:
+        path: hyprland/mako
+    ~/.config/wlogout:
+        path: hyprland/wlogout
+    ~/.config/rofi:
+        path: hyprland/rofi
+
+    # System
+    ~/.config/environment.d:
+        path: system/environment.d
+    ~/.config/paru:
+        path: system/paru
+    ~/.config/zsh:
+        path: system/zsh
+```
+</Accordion>
+
+### packages.txt
+
+Plain text file listing all required packages. See the [Packages Reference](/reference/packages) for the complete categorized list.
+
+## How It Works
+
+1. Run `./install` to start the installation process
+2. Dotbot reads `install.conf.yaml`
+3. Checks for missing packages and installs them via Paru
+4. Creates necessary directories in `~/.cache` and `~/.local`
+5. Creates symlinks from this repository to `~/.config` and `~`
+6. Cleans up any broken symlinks
+
+All configurations remain in the repository, and your actual config directories are symlinks. This makes updates as simple as `git pull`.
