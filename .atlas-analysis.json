@@ -1,0 +1,83 @@
+{
+  "projectType": "general",
+  "projectName": "Hyprland Dotfiles",
+  "projectDescription": "Modern, modular Linux desktop configuration for Arch Linux featuring Hyprland, Neovim, and a curated set of developer tools",
+  "theme": "aspen",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quick-start"
+        ]
+      },
+      {
+        "group": "Configuration",
+        "pages": [
+          "configuration/overview",
+          "configuration/hyprland",
+          "configuration/applications",
+          "configuration/shell",
+          "configuration/system"
+        ]
+      },
+      {
+        "group": "Components",
+        "pages": [
+          "components/window-manager",
+          "components/terminal",
+          "components/editor",
+          "components/status-bar",
+          "components/launcher",
+          "components/notifications"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/customization",
+          "guides/keybindings",
+          "guides/themes",
+          "guides/adding-packages",
+          "guides/troubleshooting"
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": [
+          "reference/structure",
+          "reference/packages",
+          "reference/variables",
+          "reference/aliases"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Hyprland Wayland compositor with custom configuration modules",
+    "Neovim setup with LazyVim distribution and LSP support",
+    "Kitty terminal with custom themes and keybindings",
+    "Waybar status bar with system monitoring and workspace indicators",
+    "Rofi application launcher for Wayland",
+    "Automated package installation with Paru AUR helper",
+    "Modular Zsh configuration with aliases and functions",
+    "Coordinated theming across all applications"
+  ],
+  "publicApiSurface": [
+    "./install - Main installation script",
+    "install.conf.yaml - Dotbot configuration",
+    "packages.txt - System packages list",
+    "hyprland/hypr/hyprland.conf - Main Hyprland config",
+    "hyprland/hypr/modules/ - Modular Hyprland settings",
+    "dots/nvim/ - Neovim configuration",
+    "dots/kitty/ - Kitty terminal configuration",
+    "system/zsh/ - Zsh shell configuration",
+    "hyprland/waybar/ - Waybar status bar config",
+    "hyprland/rofi/ - Rofi launcher configuration"
+  ]
+}
