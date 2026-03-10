@@ -217,6 +217,84 @@ source = $modules/binds.conf        # Keybindings
   Edit individual module files in `~/.config/hypr/modules/` to customize specific aspects of Hyprland without touching the main configuration.
 </Tip>
 
+## Idle and Lock Management
+
+Hyprland integrates with **hypridle** and **hyprlock** to provide automatic screen locking and power management.
+
+### Hypridle - Idle Daemon
+
+Automatically manages screen timeouts and system power states:
+
+```conf hypridle.conf
+general {
+    lock_cmd = pidof hyprlock || hyprlock
+    before_sleep_cmd = loginctl lock-session
+    after_sleep_cmd = hyprctl dispatch dpms on
+    ignore_dbus_inhibit = false
+}
+
+# Screen lock after 10 minutes
+listener {
+    timeout = 600
+    on-timeout = hyprlock
+}
+
+# Screen off after 15 minutes
+listener {
+    timeout = 900
+    on-timeout = hyprctl dispatch dpms off
+    on-resume = hyprctl dispatch dpms on
+}
+
+# System suspend after 30 minutes
+listener {
+    timeout = 1800
+    on-timeout = systemctl suspend
+}
+```
+
+<Tip>
+  Hypridle respects DBus and systemd inhibitors, so video playback and downloads won't trigger the lock.
+</Tip>
+
+### Hyprlock - Screen Locker
+
+Provides a beautiful, customizable lock screen with:
+
+- **Blurred wallpaper background** with adjustable contrast and brightness
+- **Large centered clock** with date display
+- **Password input field** with failure attempts counter
+- **User information** and system uptime
+- **Smooth fade-in animation**
+
+Configuration in `~/.config/hypr/hyprlock.conf`:
+
+```conf hyprlock.conf
+general {
+    no_fade_in = false
+    grace = 0
+    disable_loading_bar = false
+}
+
+background {
+    path = ~/Pictures/Wallpapers/wallpaper.jpg
+    blur_passes = 3
+    contrast = 0.8916
+    brightness = 0.8172
+}
+
+input-field {
+    size = 350, 60
+    placeholder_text = <i>Password</i>
+    fail_color = rgb(204, 34, 34)
+    capslock_color = rgb(255, 204, 0)
+}
+```
+
+**Lock Screen Shortcuts:**
+- `Super + Shift + Q` - Manually lock the screen
+- `Super + M` - Open logout menu (which includes lock option)
+
 ## Performance
 
 Optimized for performance with:

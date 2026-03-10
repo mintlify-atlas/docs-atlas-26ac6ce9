@@ -336,6 +336,10 @@ sudo chown -R $USER:$USER ~/dotfiles
    pacman -Qi package-name | grep Provides
    ```
 
+<Note>
+  **Known Issue:** The `packages.txt` file includes `swaync`, but the actual configuration uses `mako` for notifications. This is a discrepancy in the dotfiles repository. The system is configured to use mako (in `autostart.conf` and `install.conf.yaml`), so you can safely skip installing swaync.
+</Note>
+
 ### Dependency Cycle Detected
 
 **Problem:** Package installation fails with circular dependencies.
